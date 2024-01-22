@@ -1,4 +1,4 @@
-# MOVICS RShiny UI
+# MOVICShiny UI
 # Created by Junkai Zhu on 2022/07/06
 
 library(shiny)
@@ -35,18 +35,21 @@ library(CMScaller)
 library(pamr)
 library(clusterRepro)
 library(limma)
+library(spsComps)
 #library(filesstrings) #安装的话使用github安装install_github('rorynolan/filesstrings')
 
 options(timeout = 360000,shiny.maxRequestSize=30000*1024^2) #设置文件上传大小限制为30GB且响应时间为100h
 # data.table::setDTthreads(threads = 1) #设置程序运行线程为1
 #Sys.setlocale(category = "LC_ALL", locale = "zh_CN.utf8") #allow chinese
 Sys.setlocale(category = "LC_ALL",locale = "chinese")
-AppVersion="Version: V1.0"
-UpdateTime="Last Updated: 11/10/2023"
+AppVersion="Version: V2.0"
+UpdateTime="Last Updated: 01/18/2024"
 
 ui <- fluidPage(
     useShinyjs(),
     withMathJax(), #math symbols
+    #spsDepend("toastr"),
+    spsDepend("shinyCatch"),
     
     #Title Section
     fixedRow(
@@ -54,10 +57,12 @@ ui <- fluidPage(
                fixedRow(
                    div(style="color:#00008B",
                        align = "center",
-                       headerPanel("MOVICS: Multi-Omics integration and VIsualization in Cancer Subtyping"
+                       headerPanel("MOVICShiny: Website for Multi-Omics Integration and Visualization in Cancer Subtyping"
                        )
                    ),
-                   column(12,tags$p(tags$h4(tags$em(tags$strong("State Key Laboratory of Natural Medicines, Research Center of Biostatistics and Computational Pharmacy, China Pharmaceutical University, Nanjing, China")),align="center",style = "color:#317EAC"))),
+                   column(12,tags$p(tags$h4(tags$em(tags$strong("Research Center of Biostatistics and Computational Pharmacy, China Pharmaceutical University, Nanjing, China")),align="center",style = "color:#317EAC"))),
+                   column(12,tags$p(tags$h4(tags$em(tags$strong("Department of Cancer and Functional Genomics, IGBMC, Illkirch, France")),align="center",style = "color:#317EAC"))),
+                   column(12,tags$p(tags$h4(tags$em(tags$strong("Key Laboratory of Genitourinary Diseases, Anhui Medical University, Hefei, China")),align="center",style = "color:#317EAC"))),
                    column(12,tags$em(tags$p(tags$h5(AppVersion,";",UpdateTime,align = "Center", style = "color:grey"))))
                )
         )
@@ -83,7 +88,8 @@ ui <- fluidPage(
                            wellPanel(style="background-color:#47AEE9;",
                                      
                                      fixedRow(
-                                         column(12,tags$h4(strong("Basic Settings"),align="center",style="color:#834005")),
+                                         column(11,tags$h4(strong("Basic Settings"),align="center",style="color:#834005")),
+                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="1_Basic Settings.pdf")),
                                          # column(12,textAreaInput(inputId = "cancerType",
                                          #                         label = "Cancer Types From TCGA (Splitted by english semicolons)",
                                          #                         value = "",
@@ -160,7 +166,8 @@ ui <- fluidPage(
                                             conditionalPanel(condition="input.multiOmics.indexOf('6') > -1",
                                                              wellPanel(style="background-color:#47AEE9;",
                                                                        fixedRow(
-                                                                           column(12,tags$h4(strong("radiomics"),align="center",style="color:#834005")),
+                                                                           column(11,tags$h4(strong("radiomics"),align="center",style="color:#834005")),
+                                                                           column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="8_radiomics.pdf")),
                                                                            column(12,radioButtons("internal_radiomics_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                                   choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
                                                                            
@@ -202,7 +209,8 @@ ui <- fluidPage(
                            #2.Clinical & Survival
                            wellPanel(style="background-color:#47AEE9;",
                                      fixedRow(
-                                         column(12,tags$h4(strong("Clinical & Survival"),align="center",style="color:#834005")),
+                                         column(11,tags$h4(strong("Clinical & Survival"),align="center",style="color:#834005")),
+                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="3_Clinical & Survival.pdf")),
                                          column(12,radioButtons("cli_sur_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                 choices = c("Download automatically"=1,"Download from specified urls"=2,"Upload manually"=3),selected=1)),
                                          conditionalPanel(condition="input.cli_sur_approaches==1",
@@ -244,9 +252,10 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.multiOmics.includes('1') | input.multiOmics.includes('2')",
                                wellPanel(style="background-color:#47AEE9;",
                                          fixedRow(
-                                             conditionalPanel(condition="input.multiOmics.includes('1') & input.multiOmics.includes('2')",column(12,tags$h4(strong("mRNA & lncRNA"),align="center",style="color:#834005"))),
-                                             conditionalPanel(condition="input.multiOmics.includes('1') & !input.multiOmics.includes('2')",column(12,tags$h4(strong("mRNA"),align="center",style="color:#834005"))),
-                                             conditionalPanel(condition="!input.multiOmics.includes('1') & input.multiOmics.includes('2')",column(12,tags$h4(strong("lncRNA"),align="center",style="color:#834005"))),
+                                             conditionalPanel(condition="input.multiOmics.includes('1') & input.multiOmics.includes('2')",column(11,tags$h4(strong("mRNA & lncRNA"),align="center",style="color:#834005"))),
+                                             conditionalPanel(condition="input.multiOmics.includes('1') & !input.multiOmics.includes('2')",column(11,tags$h4(strong("mRNA"),align="center",style="color:#834005"))),
+                                             conditionalPanel(condition="!input.multiOmics.includes('1') & input.multiOmics.includes('2')",column(11,tags$h4(strong("lncRNA"),align="center",style="color:#834005"))),
+                                             column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="4_mRNA & lncRNA.pdf")),
                                              
                                              column(12,radioButtons("RNA_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                     choices = c("Download automatically"=1,"Download from specified urls"=2,"Upload manually"=3),selected=1)),
@@ -290,7 +299,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.multiOmics.includes('3')",
                                wellPanel(style="background-color:#47AEE9;",
                                          fixedRow(
-                                             column(12,tags$h4(strong("DNA methylation"),align="center",style="color:#834005")),
+                                             column(11,tags$h4(strong("DNA methylation"),align="center",style="color:#834005")),
+                                             column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="5_DNA methylation.pdf")),
                                              column(12,radioButtons("DNA_methylation_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                     choices = c("Download automatically"=1,"Download from specified urls"=2,"Upload manually"=3),selected=1)),
                                              conditionalPanel(condition="input.DNA_methylation_approaches==1",
@@ -334,7 +344,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.multiOmics.indexOf('4') > -1",
                                wellPanel(style="background-color:#47AEE9;",
                                          fixedRow(
-                                             column(12,tags$h4(strong("copy number alterations"),align="center",style="color:#834005")),
+                                             column(11,tags$h4(strong("copy number alterations"),align="center",style="color:#834005")),
+                                             column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="6_copy number alterations.pdf")),
                                              column(12,radioButtons("copy_number_alterations_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                     choices = c("Download automatically"=1,"Download from specified urls"=2,"Upload manually"=3),selected=1)),
                                              conditionalPanel(condition="input.copy_number_alterations_approaches==1",
@@ -377,7 +388,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.multiOmics.indexOf('5') > -1",
                                wellPanel(style="background-color:#47AEE9;",
                                          fixedRow(
-                                             column(12,tags$h4(strong("binary somatic mutation"),align="center",style="color:#834005")),
+                                             column(11,tags$h4(strong("binary somatic mutation"),align="center",style="color:#834005")),
+                                             column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="7_binary somatic mutation.pdf")),
                                              column(12,radioButtons("binary_somatic_mutation_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                     choices = c("Download automatically"=1,"Download from specified urls"=2,"Upload manually"=3),selected=1)),
                                              conditionalPanel(condition="input.binary_somatic_mutation_approaches==1",
@@ -420,7 +432,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.multiOmics.indexOf('6') > -1",
                                             wellPanel(style="background-color:#47AEE9;",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("radiomics"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("radiomics"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="8_radiomics.pdf")),
                                                           column(12,radioButtons("external_radiomics_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                  choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
                                                           
@@ -464,7 +477,8 @@ ui <- fluidPage(
                                          wellPanel(style="background-color:#47AEE9;",
                                                    
                                                    fixedRow(
-                                                       column(12,tags$h4(strong("TCGA Datasets Integration"),align="center",style="color:#834005")),
+                                                       column(11,tags$h4(strong("TCGA Datasets Integration"),align="center",style="color:#834005")),
+                                                       column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="2_TCGA Datasets Integration.pdf")),
                                                        column(12,offset=0,tags$p(h5("Now all omics datasets you specified have been well prepared, then click the 'Integrate' button below to integrate all omics datasets.",align="left"))),
                                                        column(12,actionButton("datasets_integrate","Integrate",width="100%",class="btn btn-primary"))
                                                    )
@@ -477,7 +491,8 @@ ui <- fluidPage(
                                          wellPanel(style="background-color:#47AEE9;",
                                                    
                                                    fixedRow(
-                                                       column(12,tags$h4(strong("Validation Datasets Preparation"),align="center",style="color:#834005")),
+                                                       column(11,tags$h4(strong("Validation Datasets Preparation"),align="center",style="color:#834005")),
+                                                       column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="9_Validation Datasets Preparation.pdf")),
                                                        column(12,offset=0,tags$p(h5("Now let's start to prepare the validation datasets which will be used in 'RUN Module' and 'COMP Module'.",align="left"))),
                                                        column(12,checkboxGroupInput(inputId = "validation_multiOmics",
                                                                                     label = "Multi-omics Types",
@@ -517,7 +532,8 @@ ui <- fluidPage(
                                                           #Clinical & Survival(Validation)
                                                           wellPanel(style="background-color:#47AEE9;",
                                                                     fixedRow(
-                                                                        column(12,tags$h4(strong("Clinical & Survival(Validation)"),align="center",style="color:#834005")),
+                                                                        column(11,tags$h4(strong("Clinical & Survival(Validation)"),align="center",style="color:#834005")),
+                                                                        column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="10_Clinical & Survival(Validation).pdf")),
                                                                         column(12,radioButtons("validation_cli_sur_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                                choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
                                                                         conditionalPanel(condition="input.validation_cli_sur_approaches==1",
@@ -556,9 +572,10 @@ ui <- fluidPage(
                                                           conditionalPanel(condition="input.validation_multiOmics.includes('1') | input.validation_multiOmics.includes('2')",
                                                                            wellPanel(style="background-color:#47AEE9;",
                                                                                      fixedRow(
-                                                                                         conditionalPanel(condition="input.validation_multiOmics.includes('1') & input.validation_multiOmics.includes('2')",column(12,tags$h4(strong("mRNA & lncRNA(Validation)"),align="center",style="color:#834005"))),
-                                                                                         conditionalPanel(condition="input.validation_multiOmics.includes('1') & !input.validation_multiOmics.includes('2')",column(12,tags$h4(strong("mRNA(Validation)"),align="center",style="color:#834005"))),
-                                                                                         conditionalPanel(condition="!input.validation_multiOmics.includes('1') & input.validation_multiOmics.includes('2')",column(12,tags$h4(strong("lncRNA(Validation)"),align="center",style="color:#834005"))),
+                                                                                         conditionalPanel(condition="input.validation_multiOmics.includes('1') & input.validation_multiOmics.includes('2')",column(11,tags$h4(strong("mRNA & lncRNA(Validation)"),align="center",style="color:#834005"))),
+                                                                                         conditionalPanel(condition="input.validation_multiOmics.includes('1') & !input.validation_multiOmics.includes('2')",column(11,tags$h4(strong("mRNA(Validation)"),align="center",style="color:#834005"))),
+                                                                                         conditionalPanel(condition="!input.validation_multiOmics.includes('1') & input.validation_multiOmics.includes('2')",column(11,tags$h4(strong("lncRNA(Validation)"),align="center",style="color:#834005"))),
+                                                                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="11_mRNA & lncRNA(Validation).pdf")),
                                                                                          
                                                                                          column(12,radioButtons("validation_RNA_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                                                 choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
@@ -599,7 +616,8 @@ ui <- fluidPage(
                                                           conditionalPanel(condition="input.validation_multiOmics.includes('3')",
                                                                            wellPanel(style="background-color:#47AEE9;",
                                                                                      fixedRow(
-                                                                                         column(12,tags$h4(strong("DNA methylation(Validation)"),align="center",style="color:#834005")),
+                                                                                         column(11,tags$h4(strong("DNA methylation(Validation)"),align="center",style="color:#834005")),
+                                                                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="12_DNA methylation(Validation).pdf")),
                                                                                          column(12,radioButtons("validation_DNA_methylation_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                                                 choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
                                                                                          conditionalPanel(condition="input.validation_DNA_methylation_approaches==1",
@@ -640,7 +658,8 @@ ui <- fluidPage(
                                                           conditionalPanel(condition="input.validation_multiOmics.indexOf('4') > -1",
                                                                            wellPanel(style="background-color:#47AEE9;",
                                                                                      fixedRow(
-                                                                                         column(12,tags$h4(strong("copy number alterations(Validation)"),align="center",style="color:#834005")),
+                                                                                         column(11,tags$h4(strong("copy number alterations(Validation)"),align="center",style="color:#834005")),
+                                                                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="13_copy number alterations(Validation).pdf")),
                                                                                          column(12,radioButtons("validation_copy_number_alterations_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                                                 choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
                                                                                          conditionalPanel(condition="input.validation_copy_number_alterations_approaches==1",
@@ -680,7 +699,8 @@ ui <- fluidPage(
                                                           conditionalPanel(condition="input.validation_multiOmics.indexOf('5') > -1",
                                                                            wellPanel(style="background-color:#47AEE9;",
                                                                                      fixedRow(
-                                                                                         column(12,tags$h4(strong("binary somatic mutation(Validation)"),align="center",style="color:#834005")),
+                                                                                         column(11,tags$h4(strong("binary somatic mutation(Validation)"),align="center",style="color:#834005")),
+                                                                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="14_binary somatic mutation(Validation).pdf")),
                                                                                          column(12,radioButtons("validation_binary_somatic_mutation_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                                                 choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
                                                                                          conditionalPanel(condition="input.validation_binary_somatic_mutation_approaches==1",
@@ -720,7 +740,8 @@ ui <- fluidPage(
                                                           conditionalPanel(condition="input.validation_multiOmics.indexOf('6') > -1",
                                                                            wellPanel(style="background-color:#47AEE9;",
                                                                                      fixedRow(
-                                                                                         column(12,tags$h4(strong("radiomics"),align="center",style="color:#834005")),
+                                                                                         column(11,tags$h4(strong("radiomics"),align="center",style="color:#834005")),
+                                                                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="15_radiomics(Validation).pdf")),
                                                                                          column(12,radioButtons("validation_external_radiomics_approaches", h5(strong("Approaches")), inline=TRUE,
                                                                                                                 choices = c("Download from specified urls"=1,"Upload manually"=2),selected=2)),
                                                                                          
@@ -761,7 +782,8 @@ ui <- fluidPage(
                                                           wellPanel(style="background-color:#47AEE9;",
                                                                     
                                                                     fixedRow(
-                                                                        column(12,tags$h4(strong("Validation Datasets Integration"),align="center",style="color:#834005")),
+                                                                        column(11,tags$h4(strong("Validation Datasets Integration"),align="center",style="color:#834005")),
+                                                                        column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="16_Validation Datasets Integration.pdf")),
                                                                         column(12,offset=0,tags$p(h5("Now all omics datasets you specified have been well prepared, then click the 'Integrate' button below to integrate all omics datasets.",align="left"))),
                                                                         column(12,actionButton("validation_datasets_integrate","Integrate",width="100%",class="btn btn-primary"))
                                                                     )
@@ -771,10 +793,10 @@ ui <- fluidPage(
                     ),
                     br(),
                     column(7,
-                           tabsetPanel(
+                           tabsetPanel(id="Data_Preparation_Results",
                                
                                #Data Preparation (TCGA)
-                               tabPanel(tags$h5(tags$strong("Data Preparation (TCGA)"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Data Preparation (TCGA)"),align="center",style="color:#FFA500"),value="Data_Preparation_TCGA",br(),
                                         
                                         ###创建用户
                                         column(12,uiOutput("user_create")),
@@ -946,7 +968,7 @@ ui <- fluidPage(
                                ),
                                
                                #Data Integration (TCGA)
-                               tabPanel(tags$h5(tags$strong("Data Integration (TCGA)"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Data Integration (TCGA)"),align="center",style="color:#FFA500"),value="Data_Integration_TCGA",br(),
                                         
                                         ####外部数据整合
                                         column(12,uiOutput("datasets_integration_finish"))
@@ -1027,7 +1049,7 @@ ui <- fluidPage(
                                ),
                                
                                #Data Preparation (Validation)
-                               tabPanel(tags$h5(tags$strong("Data Preparation (Validation)"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Data Preparation (Validation)"),align="center",style="color:#FFA500"),value="Data_Preparation_Validation",br(),
                                         
                                         ###Validation
                                         ####Validation文件夹
@@ -1196,7 +1218,7 @@ ui <- fluidPage(
                                ),
                                
                                #Data Integration (Validation)
-                               tabPanel(tags$h5(tags$strong("Data Integration (Validation)"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Data Integration (Validation)"),align="center",style="color:#FFA500"),value="Data_Integration_Validation",br(),
                                         
                                         ####外部数据整合
                                         column(12,uiOutput("validation_datasets_integration_finish"))
@@ -1292,8 +1314,9 @@ ui <- fluidPage(
                                      
                                      fixedRow(
                                          #设置步骤选项,每个步骤对应不同的参数
-                                         column(12,radioButtons("getModuleStep", h5(strong("Steps")), inline=FALSE,
-                                                                choices = c("Get Elites"=1,"Get Clustering Number"=2,"Consensus Clustering"=3,"Silhouette"=4,"Multi-omics Heatmaps"=5),selected=1))
+                                         column(11,radioButtons("getModuleStep", h5(strong("Steps")), inline=FALSE,
+                                                                choices = c("Get Elites"=1,"Get Clustering Number"=2,"Consensus Clustering"=3,"Silhouette"=4,"Multi-omics Heatmaps"=5),selected=1)),
+                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="1_GET Module.pdf"))
                                      )
                            ),
                            
@@ -1301,7 +1324,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.getModuleStep==1",
                                 wellPanel(style="background-color:#47AEE9",
                                     fixedRow(
-                                        column(12,tags$h4(strong("Get Elites"),align="center",style="color:#834005")),
+                                        column(11,tags$h4(strong("Get Elites"),align="center",style="color:#834005")),
+                                        column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="2_Get Elites.pdf")),
                                         column(12,offset=0,tags$p(h5(strong("In this step, we will filter out features that meet some stringent requirements as well as handle missing values. Now let's choose the datasets for 'Get Elites' first:",align="left")))),
                                         #Get elites on tcga datasets or validation datasets
                                         column(12,radioButtons("tcga_vali_getElites", h5(strong("Get elites on tcga datasets or validation datasets")), inline=TRUE, choices = c("TCGA"=1,"Validation"=2),selected=1)),
@@ -1359,7 +1383,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.mRNA_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for mRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for mRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="3_Get Elites settings for mRNA dataset.pdf")),
                                                                                                  column(12,radioButtons("mRNA_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("mRNA_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("mRNA_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1398,7 +1423,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.lncRNA_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for lncRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for lncRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="4_Get Elites settings for lncRNA dataset.pdf")),
                                                                                                  column(12,radioButtons("lncRNA_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("lncRNA_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("lncRNA_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1437,7 +1463,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.DNA_methylation_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for DNA methylation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for DNA methylation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="5_Get Elites settings for DNA methylation dataset.pdf")),
                                                                                                  column(12,radioButtons("DNA_methylation_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("DNA_methylation_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("DNA_methylation_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1476,7 +1503,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.copy_number_alterations_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for copy number alterations dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for copy number alterations dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="6_Get Elites settings for copy number alterations dataset.pdf")),
                                                                                                  column(12,radioButtons("copy_number_alterations_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("copy_number_alterations_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("copy_number_alterations_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1515,7 +1543,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.binary_somatic_mutation_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for binary somatic mutation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for binary somatic mutation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="7_Get Elites settings for binary somatic mutation dataset.pdf")),
                                                                                                  column(12,radioButtons("binary_somatic_mutation_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("binary_somatic_mutation_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("binary_somatic_mutation_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1543,7 +1572,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.radiomics_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for radiomics dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for radiomics dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="8_Get Elites settings for radiomics dataset.pdf")),
                                                                                                  column(12,radioButtons("radiomics_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("radiomics_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("radiomics_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1586,7 +1616,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.validation_mRNA_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for mRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for mRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="3_Get Elites settings for mRNA dataset.pdf")),
                                                                                                  column(12,radioButtons("validation_mRNA_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("validation_mRNA_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("validation_mRNA_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1625,7 +1656,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.validation_lncRNA_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for lncRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for lncRNA dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="4_Get Elites settings for lncRNA dataset.pdf")),
                                                                                                  column(12,radioButtons("validation_lncRNA_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("validation_lncRNA_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("validation_lncRNA_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1664,7 +1696,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.validation_DNA_methylation_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for DNA methylation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for DNA methylation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="5_Get Elites settings for DNA methylation dataset.pdf")),
                                                                                                  column(12,radioButtons("validation_DNA_methylation_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("validation_DNA_methylation_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("validation_DNA_methylation_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1703,7 +1736,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.validation_copy_number_alterations_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for copy number alterations dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for copy number alterations dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="6_Get Elites settings for copy number alterations dataset.pdf")),
                                                                                                  column(12,radioButtons("validation_copy_number_alterations_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("validation_copy_number_alterations_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("validation_copy_number_alterations_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1742,7 +1776,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.validation_binary_somatic_mutation_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for binary somatic mutation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for binary somatic mutation dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="7_Get Elites settings for binary somatic mutation dataset.pdf")),
                                                                                                  column(12,radioButtons("validation_binary_somatic_mutation_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("validation_binary_somatic_mutation_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("validation_binary_somatic_mutation_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1770,7 +1805,8 @@ ui <- fluidPage(
                                                                   conditionalPanel(condition="input.validation_radiomics_getElites==1",
                                                                                    wellPanel(style="background-color:#47AEE9",
                                                                                              fixedRow(
-                                                                                                 column(12,tags$h4(strong("Get Elites settings for radiomics dataset"),align="center",style="color:#834005")),
+                                                                                                 column(11,tags$h4(strong("Get Elites settings for radiomics dataset"),align="center",style="color:#834005")),
+                                                                                                 column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="8_Get Elites settings for radiomics dataset.pdf")),
                                                                                                  column(12,radioButtons("validation_radiomics_getElites_survival", h5(strong("Use survival information or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
                                                                                                  column(12,radioButtons("validation_radiomics_getElites_na", h5(strong("NA value action")), inline=TRUE, choices = c("Remove directly"=1,"KNN imputation"=2,"No action"=3),selected=1)),
                                                                                                  column(12,radioButtons("validation_radiomics_getElites_log2", h5(strong("Perform log2 transformation for data before calculating statistics or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -1809,7 +1845,8 @@ ui <- fluidPage(
                                 wellPanel(style="background-color:#47AEE9;",
                                           
                                           fixedRow(
-                                              column(12,tags$h4(strong("Process Get Elites"),align="center",style="color:#834005")),
+                                              column(11,tags$h4(strong("Process Get Elites"),align="center",style="color:#834005")),
+                                              column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="9_Process Get Elites.pdf")),
                                               column(12,offset=0,tags$p(h5("Now click the 'Process' button below to process 'Get Elites' based on the settings above, and then integrate datasets for following steps.",align="left"))),
                                               column(12,actionButton("Get_Elites_process","Process",width="100%",class="btn btn-primary"))
                                           )
@@ -1820,7 +1857,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.getModuleStep==2",
                                 wellPanel(style="background-color:#47AEE9",
                                     fixedRow(
-                                        column(12,tags$h4(strong("Get Clustering Number"),align="center",style="color:#834005")),
+                                        column(11,tags$h4(strong("Get Clustering Number"),align="center",style="color:#834005")),
+                                        column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="10_Get Clustering Number.pdf")),
                                         column(12,offset=0,tags$p(h5(strong("This step aims to search the optimal number for multi-omics integrative clustering determined by 'clustering prediction index' (CPI) and 'Gap-statistics' (Gapk).",align="left")))),
                                         column(12,offset=0,tags$p(h5(strong("Please indicate the range of clustering number first:",align="left")))),
                                         column(12,numericInput("getClusteringNumber_min",label="Minimum",value=2,min=1,step=1)),
@@ -1841,7 +1879,8 @@ ui <- fluidPage(
                           conditionalPanel(condition="input.getModuleStep==3",
                                wellPanel(style="background-color:#47AEE9",
                                    fixedRow(
-                                       column(12,tags$h4(strong("Consensus Clustering"),align="center",style="color:#834005")),
+                                       column(11,tags$h4(strong("Consensus Clustering"),align="center",style="color:#834005")),
+                                       column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="11_Consensus Clustering(1).pdf")),
                                        column(12,offset=0,tags$p(h5(strong("This step aims to perform multi-omics integrative clustering by specifying one or more algorithms at once.",align="left")))),
                                        column(12,offset=0,tags$p(h5(strong("Now let's choose clustering algorithms at first. If you want to get consensus results from different algorithms, please choose at least two algorithms!",align="left")))),
                                        column(12,checkboxGroupInput(inputId = "multiClusteringAlgorithms",
@@ -1859,8 +1898,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('iClusterBayes')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("iClusterBayes"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("iClusterBayes"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="12_iClusterBayes.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("iClusterBayes_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.iClusterBayes_N_clust==2",
@@ -1919,8 +1958,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('SNF')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("SNF"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("SNF"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="13_SNF.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("SNF_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.SNF_N_clust==2",
@@ -1931,7 +1970,7 @@ ui <- fluidPage(
                                                 column(12,numericInput("SNF_K",label="The number of neighbors in K-nearest neighbors part of the algorithm",value=30,min=0,step=1)),
                                                 
                                                 #The number of interations for the diffusion process
-                                                column(12,numericInput("SNF_t",label="The number of interations for the diffusion process",value=20,min=0,step=1)),
+                                                column(12,numericInput("SNF_t",label="The number of iterations for the diffusion process",value=20,min=0,step=1)),
                                                 
                                                 #The variance for local model
                                                 column(12,numericInput("SNF_sigma",label="The variance for local model",value=0.5,min=0,step=0.05)),
@@ -1945,8 +1984,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('PINSPlus')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("PINSPlus"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("PINSPlus"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="14_PINSPlus.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("PINSPlus_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.PINSPlus_N_clust==2",
@@ -1974,8 +2013,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('NEMO')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("NEMO"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("NEMO"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="15_NEMO.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("NEMO_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.NEMO_N_clust==2",
@@ -2002,8 +2041,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('COCA')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("COCA"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("COCA"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="16_COCA.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("COCA_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.COCA_N_clust==2",
@@ -2025,8 +2064,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('LRAcluster')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("LRAcluster"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("LRAcluster"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="17_LRAcluster.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("LRAcluster_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.LRAcluster_N_clust==2",
@@ -2045,8 +2084,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('ConsensusClustering')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("ConsensusClustering"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("ConsensusClustering"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="18_ConsensusClustering.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("ConsensusClustering_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.ConsensusClustering_N_clust==2",
@@ -2068,11 +2107,11 @@ ui <- fluidPage(
                                                 #The cluster algorithm
                                                 column(12,textInput(inputId="ConsensusClustering_clusterAlg",label="The cluster algorithm",value="hc")),
                                                 
-                                                #The heirachical linakge method for subsampling
-                                                column(12,textInput(inputId="ConsensusClustering_innerLinkage",label="The heirachical linakge method for subsampling",value="ward.D")),
+                                                #The hierarchical linkage method for subsampling
+                                                column(12,textInput(inputId="ConsensusClustering_innerLinkage",label="The hierarchical linkage method for subsampling",value="ward.D")),
                                                 
-                                                #The heirarchical method for consensus matrix
-                                                column(12,textInput(inputId="ConsensusClustering_finalLinkage",label="The heirarchical method for consensus matrix",value="ward.D")),
+                                                #The hierarchical method for consensus matrix
+                                                column(12,textInput(inputId="ConsensusClustering_finalLinkage",label="The hierarchical method for consensus matrix",value="ward.D")),
                                                 
                                                 #The distance function
                                                 column(12,textInput(inputId="ConsensusClustering_distance",label="The distance function",value="pearson")),
@@ -2100,7 +2139,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('IntNMF')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("IntNMF"),align="center",style="color:#834005")),
+                                                column(11,tags$h4(strong("IntNMF"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="19_IntNMF.pdf")),
                                                 # column(12,offset=0,tags$p(h5(strong("You don't need to indicate any parameters, just click the 'process' button below.",align="left")))),
                                                 
                                                 #The number of clusters
@@ -2118,8 +2158,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('CIMLR')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("CIMLR"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("CIMLR"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="20_CIMLR.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("CIMLR_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.CIMLR_N_clust==2",
@@ -2138,8 +2178,8 @@ ui <- fluidPage(
                                     conditionalPanel(condition="input.multiClusteringAlgorithms.includes('MoCluster')",
                                         wellPanel(style="background-color:#47AEE9",
                                             fixedRow(
-                                                column(12,tags$h4(strong("MoCluster"),align="center",style="color:#834005")),
-                                                
+                                                column(11,tags$h4(strong("MoCluster"),align="center",style="color:#834005")),
+                                                column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="21_MoCluster.pdf")),
                                                 #The number of clusters
                                                 column(12,radioButtons("MoCluster_N_clust", h5(strong("The number of clusters")), inline=TRUE, choices = c("System optimal"=1,"User defined"=2),selected=1)),
                                                 conditionalPanel(condition="input.MoCluster_N_clust==2",
@@ -2158,7 +2198,7 @@ ui <- fluidPage(
                                                 #A numeric value to indicate the absolute number (if k >= 1) or the proportion (if 0 < k < 1) of non-zero coefficients for the variable loading vectors
                                                 column(12,offset=0,tags$p(h5(strong("A numeric value to indicate the absolute number (if k >= 1) or the proportion (if 0 < k < 1) of non-zero coefficients for the variable loading vectors.",align="left")))),
                                                 ##The format
-                                                column(12,radioButtons("MoCluster_k_format", h5(strong("Format")), inline=FALSE, choices = c("Absolute number"=1,"Proportion"=2,"all"=3),selected=1)),
+                                                column(12,radioButtons("MoCluster_k_format", h5(strong("Format")), inline=FALSE, choices = c("Absolute number"=1,"Proportion"=2),selected=1)),
                                                 ##Setting
                                                 conditionalPanel(condition="input.MoCluster_k_format==1",
                                                     column(12,radioButtons("MoCluster_k_setting1", h5(strong("Setting")), inline=TRUE, choices = c("For all omics"=1,"For each omic"=2),selected=1)),
@@ -2202,7 +2242,8 @@ ui <- fluidPage(
                                conditionalPanel(condition="input.multiClusteringAlgorithms.length>1",
                                                 wellPanel(style="background-color:#47AEE9",
                                                           fixedRow(
-                                                              column(12,tags$h4(strong("Consensus Clustering"),align="center",style="color:#834005")),
+                                                              column(11,tags$h4(strong("Consensus Clustering"),align="center",style="color:#834005")),
+                                                              column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="22_Consensus Clustering(2).pdf")),
                                                               column(12,offset=0,tags$p(h5(strong("You choose more than 1 algorithm and all of them shall be run with parameters by default.",align="left")))),
                                                               
                                                               #The number of clusters
@@ -2216,7 +2257,8 @@ ui <- fluidPage(
                                                 ),
                                                 wellPanel(style="background-color:#47AEE9",
                                                           fixedRow(
-                                                              column(12,tags$h4(strong("Consensus Heatmap"),align="center",style="color:#834005")),
+                                                              column(11,tags$h4(strong("Consensus Heatmap"),align="center",style="color:#834005")),
+                                                              column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="23_Consensus Heatmap.pdf")),
                                                               #Distance measurement for hierarchical clustering
                                                               column(12,textInput(inputId="consensus_clustering_distance",label="Distance measurement for hierarchical clustering",value="euclidean")),
                                                               #Clustering method for hierarchical clustering
@@ -2259,7 +2301,8 @@ ui <- fluidPage(
                               
                               wellPanel(style="background-color:#47AEE9",
                                         fixedRow(
-                                            column(12,tags$h4(strong("Silhouette"),align="center",style="color:#834005")),
+                                            column(11,tags$h4(strong("Silhouette"),align="center",style="color:#834005")),
+                                            column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="24_Silhouette.pdf")),
                                             column(12,offset=0,tags$p(h5(strong("This step aims to visualize silhouette information from consensus clustering.",align="left")))),
                                             #Colors for annotating each cluster
                                             column(12,radioButtons("silhouette_clustcolor", h5(strong("Colors for annotating each cluster")), inline=TRUE, choices = c("System default"=1,"User defined"=2),selected=1)),
@@ -2297,70 +2340,70 @@ ui <- fluidPage(
                                                                           #iClusterBayes
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('iClusterBayes')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (iClusterBayes)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (iClusterBayes)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #SNF
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('SNF')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (SNF)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (SNF)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #PINSPlus
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('PINSPlus')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (PINSPlus)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (PINSPlus)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #NEMO
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('NEMO')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (NEMO)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (NEMO)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #COCA
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('COCA')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (COCA)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (COCA)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #LRAcluster
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('LRAcluster')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (LRAcluster)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (LRAcluster)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #ConsensusClustering
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('ConsensusClustering')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (ConsensusClustering)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (ConsensusClustering)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #IntNMF
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('IntNMF')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (IntNMF)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (IntNMF)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #CIMLR
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('CIMLR')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (CIMLR)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (CIMLR)"),align="center",style="color:#834005"))        
                                                                           ),
                                                                           
                                                                           #MoCluster
                                                                           conditionalPanel(condition="input.multiClusteringAlgorithms.includes('MoCluster')",
                                                                                            
-                                                                                           column(12,tags$h4(strong("Multi-omics Heatmaps (MoCluster)"),align="center",style="color:#834005"))        
+                                                                                           column(11,tags$h4(strong("Multi-omics Heatmaps (MoCluster)"),align="center",style="color:#834005"))        
                                                                           )
                                                          ),
                                                          
                                                          ##聚类方法数大于1
                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.length>1",
                                                                           
-                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (multiple algorithms)"),align="center",style="color:#834005"))
+                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (multiple algorithms)"),align="center",style="color:#834005"))
                                                          ),
-                                                         
+                                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="25_Multi-omics Heatmaps(1).pdf")),
                                                          column(12,offset=0,tags$p(h5(strong("This step aims to vertically concatenate multiple heatmap derived from each omics data combined with clustering results and other annotation information.",align="left")))),
                                                          
                                                          ##聚类方法数大于1
@@ -2405,69 +2448,71 @@ ui <- fluidPage(
                                                                          #iClusterBayes
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('iClusterBayes')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (iClusterBayes)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (iClusterBayes)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #SNF
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('SNF')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (SNF)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (SNF)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #PINSPlus
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('PINSPlus')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (PINSPlus)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (PINSPlus)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #NEMO
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('NEMO')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (NEMO)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (NEMO)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #COCA
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('COCA')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (COCA)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (COCA)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #LRAcluster
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('LRAcluster')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (LRAcluster)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (LRAcluster)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #ConsensusClustering
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('ConsensusClustering')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (ConsensusClustering)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (ConsensusClustering)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #IntNMF
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('IntNMF')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (IntNMF)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (IntNMF)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #CIMLR
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('CIMLR')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (CIMLR)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (CIMLR)"),align="center",style="color:#834005"))        
                                                                          ),
                                                                          
                                                                          #MoCluster
                                                                          conditionalPanel(condition="input.multiClusteringAlgorithms.includes('MoCluster')",
                                                                                           
-                                                                                          column(12,tags$h4(strong("Multi-omics Heatmaps (MoCluster)"),align="center",style="color:#834005"))        
+                                                                                          column(11,tags$h4(strong("Multi-omics Heatmaps (MoCluster)"),align="center",style="color:#834005"))        
                                                                          )
                                                         ),
                                                         
                                                         ##聚类方法数大于1
                                                         conditionalPanel(condition="input.multiClusteringAlgorithms.length>1",
                                                                          
-                                                                         column(12,tags$h4(strong("Multi-omics Heatmaps (multiple algorithms)"),align="center",style="color:#834005"))
+                                                                         column(11,tags$h4(strong("Multi-omics Heatmaps (multiple algorithms)"),align="center",style="color:#834005"))
                                                         ),
+                                                        
+                                                        column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="26_Multi-omics Heatmaps(2).pdf")),
                                                         
                                                         ##热图参数设置
                                                         column(12,offset=0,tags$p(h5(strong("Then let's set the parameters of the heatmap:",align="left")))),
@@ -2786,8 +2831,8 @@ ui <- fluidPage(
                     ),
                     br(),
                     column(7,
-                           tabsetPanel(
-                               tabPanel(tags$h5(tags$strong("Get Elites"),align="center",style="color:#FFA500"),br(),
+                           tabsetPanel(id="GET_Module_Results",
+                               tabPanel(tags$h5(tags$strong("Get Elites"),align="center",style="color:#FFA500"),value="Get_Elites",br(),
                                         column(12,uiOutput("getElites_finish"))
                                         # column(12,uiOutput("getElites_finish")),
                                         # br(),br(),
@@ -2828,13 +2873,13 @@ ui <- fluidPage(
                                         # dataTableOutput("table.getElites_radiomics") #表格
                                         # # uiOutput("table.getElites_radiomics_Note") #脚注
                                ),
-                               tabPanel(tags$h5(tags$strong("Get Clustering Number"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Get Clustering Number"),align="center",style="color:#FFA500"),value="Get_Clustering_Number",br(),
                                         # column(12,h3(plotOutput("getClusteringNumber_figure"))),
                                         uiOutput("getClusteringNumber_figure_unit"),
                                         br(),br(),
                                         column(12,uiOutput("getClusteringNumber_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("Consensus Clustering"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Consensus Clustering"),align="center",style="color:#FFA500"),value="Consensus_Clustering",br(),
                                         column(12,uiOutput("iClusterBayes_finish")),
                                         column(12,uiOutput("SNF_finish")),
                                         column(12,uiOutput("PINSPlus_finish")),
@@ -2852,13 +2897,13 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("cmoic_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("Silhouette"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Silhouette"),align="center",style="color:#FFA500"),value="Silhouette",br(),
                                         # column(12,h3(plotOutput("silhouette_figure"))),
                                         uiOutput("silhouette_figure_unit"),
                                         br(),br(),
                                         column(12,uiOutput("silhouette_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("Multi-omics Heatmaps"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Multi-omics Heatmaps"),align="center",style="color:#FFA500"),value="Multi-omics_Heatmaps",br(),
                                         # column(12,h3(plotOutput("heatmap_figure"))),
                                         uiOutput("heatmap_figure_unit"),
                                         br(),br(),
@@ -2880,8 +2925,9 @@ ui <- fluidPage(
                                      
                                      fixedRow(
                                          #设置步骤选项,每个步骤对应不同的参数
-                                         column(12,radioButtons("compModuleStep", h5(strong("Steps")), inline=FALSE,
-                                                                choices = c("Compare survival outcome"=1,"Compare clinical features"=2,"Compare mutational frequency"=3,"Compare total mutation burden"=4,"Compare fraction genome altered"=5,"Compare drug sensitivity"=6,"Compare agreement with other subtypes"=7),selected=1))
+                                         column(11,radioButtons("compModuleStep", h5(strong("Steps")), inline=FALSE,
+                                                                choices = c("Compare survival outcome"=1,"Compare clinical features"=2,"Compare mutational frequency"=3,"Compare total mutation burden"=4,"Compare fraction genome altered"=5,"Compare drug sensitivity"=6,"Compare agreement with other subtypes"=7),selected=1)),
+                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="1_COMP Module.pdf"))
                                      )
                            ),
                            
@@ -2889,7 +2935,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.compModuleStep==1",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Compare survival outcome"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Compare survival outcome"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="2_Compare survival outcome.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("In this step, we will compare the prognosis of different subtypes based on the clustering results from 'GET Module' by Kaplan-Meier survival curve.",align="left")))),
                                                           column(12,offset=0,tags$p(h5(strong("Pay attention: the format of survival time should be days and the values of survival status should be 0 or 1 (0: censoring; 1: event). Please make sure you provide the correct survival information first.",align="left")))),
                                                           #Compare survival outcome on tcga datasets or validation datasets
@@ -2975,7 +3022,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.compModuleStep==2",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Compare clinical features"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Compare clinical features"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="3_Compare clinical features.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("In this step, a table that is easy to use in medical research papers will be created to summarize the specified baseline variables (continuous & categorical) stratified by specified categorical variable and then perform statistical tests.",align="left")))),
                                                           #Compare clinical features on tcga datasets or validation datasets
                                                           column(12,radioButtons("tcga_vali_compClinvar", h5(strong("Compare clinical features on tcga datasets or validation datasets")), inline=TRUE, choices = c("TCGA"=1,"Validation"=2),selected=1)),
@@ -3078,7 +3126,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.compModuleStep==3",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Compare mutational frequency"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Compare mutational frequency"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="4_Compare mutational frequency.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("In this step, a table and an oncoprint will be generated to compare mutational frequency among different multi-omics integerative clusters to test the independency between subtypes and mutational status.",align="left")))),
                                                           #Compare mutational frequency on tcga datasets or validation datasets
                                                           column(12,radioButtons("tcga_vali_compMut", h5(strong("Compare mutational frequency on tcga datasets or validation datasets")), inline=TRUE, choices = c("TCGA"=1,"Validation"=2),selected=1)),
@@ -3198,7 +3247,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.compModuleStep==4",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Compare total mutation burden"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Compare total mutation burden"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="5_Compare total mutation burden.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("In this step, we will calculate Total Mutation Burden (TMB) and compare them among current subtypes.",align="left")))),
                                                           #Compare total mutation burden on tcga datasets or validation datasets
                                                           column(12,radioButtons("tcga_vali_compTMB", h5(strong("Compare total mutation burden on tcga datasets or validation datasets")), inline=TRUE, choices = c("TCGA"=1,"Validation"=2),selected=1)),
@@ -3277,7 +3327,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.compModuleStep==5",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Compare fraction genome altered"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Compare fraction genome altered"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="6_Compare fraction genome altered.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step calculates Fraction Genome Altered (FGA), Fraction Genome Gained (FGG) as well as Fraction Genome Lost (FGL) seperately, and compares them among current subtypes.",align="left")))),
                                                           #Compare fraction genome altered on tcga datasets or validation datasets
                                                           column(12,radioButtons("tcga_vali_compFGA", h5(strong("Compare fraction genome altered on tcga datasets or validation datasets")), inline=TRUE, choices = c("TCGA"=1,"Validation"=2),selected=1)),
@@ -3348,7 +3399,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.compModuleStep==6",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Compare drug sensitivity"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Compare drug sensitivity"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="7_Compare drug sensitivity.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step estimates the IC50 of specific drug for each subtype by developing a ridge regression predictive model based on all/specific cell lines derived from Genomics of Drug Sensitivity in Cancer (GDSC) and compares the IC50 among current subtypes.",align="left")))),
                                                           #Compare drug sensitivity on tcga datasets or validation datasets
                                                           column(12,radioButtons("tcga_vali_compDrugsen", h5(strong("Compare drug sensitivity on tcga datasets or validation datasets")), inline=TRUE, choices = c("TCGA"=1,"Validation"=2),selected=1)),
@@ -3417,7 +3469,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.compModuleStep==7",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Compare agreement with other subtypes"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Compare agreement with other subtypes"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="8_Compare agreement with other subtypes.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step aims to compute four evaluation indicators, including Rand Index, Jaccard Index, Fowlkes-Mallows, and Normalized Mutual Information for agreement of two partitions, then generate a barplot and an alluvial diagram for visualization.",align="left")))),
                                                           #Compare agreement with other subtypes on tcga datasets or validation datasets
                                                           column(12,radioButtons("tcga_vali_compAgree", h5(strong("Compare agreement with other subtypes on tcga datasets or validation datasets")), inline=TRUE, choices = c("TCGA"=1,"Validation"=2),selected=1)),
@@ -3478,15 +3531,15 @@ ui <- fluidPage(
                     ),
                     br(),
                     column(7,
-                           tabsetPanel(
-                               tabPanel(tags$h5(tags$strong("Survival"),align="center",style="color:#FFA500"),br(),
+                           tabsetPanel(id="COMP_Module_Results",
+                               tabPanel(tags$h5(tags$strong("Survival"),align="center",style="color:#FFA500"),value="Survival",br(),
                                         
                                     # column(12,h3(plotOutput("compSurv_figure"))),
                                     uiOutput("compSurv_figure_unit"), #Kaplan-Meier curve
                                     br(),br(),
                                     column(12,uiOutput("compSurv_finish"))    
                                ),
-                               tabPanel(tags$h5(tags$strong("Clinical Features"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Clinical Features"),align="center",style="color:#FFA500"),value="Clinical_Features",br(),
                                     
                                     uiOutput("table.compClinvarTitle"), #标题
                                     column(12,br()),
@@ -3495,7 +3548,7 @@ ui <- fluidPage(
                                     br(),br(),
                                     column(12,uiOutput("compClinvar_finish"))    
                                ),
-                               tabPanel(tags$h5(tags$strong("Mutational Frequency"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Mutational Frequency"),align="center",style="color:#FFA500"),value="Mutational_Frequency",br(),
                                     
                                     # column(12,h3(plotOutput("compMut_figure"))),
                                     uiOutput("compMut_figure_unit"), #oncoprint
@@ -3507,7 +3560,7 @@ ui <- fluidPage(
                                     br(),br(),
                                     column(12,uiOutput("compMut_finish"))      
                                ),
-                               tabPanel(tags$h5(tags$strong("TMB"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("TMB"),align="center",style="color:#FFA500"),value="TMB",br(),
                                     
                                     # column(12,h3(plotOutput("compTMB_figure"))),
                                     uiOutput("compTMB_figure_unit"), #boxviolin plot    
@@ -3519,7 +3572,7 @@ ui <- fluidPage(
                                     br(),br(),
                                     column(12,uiOutput("compTMB_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("FGA"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("FGA"),align="center",style="color:#FFA500"),value="FGA",br(),
                                      
                                         # column(12,h3(plotOutput("compFGA_figure"))),
                                         uiOutput("compFGA_figure_unit"), #barplot    
@@ -3531,7 +3584,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("compFGA_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("Drug Sensitivity"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Drug Sensitivity"),align="center",style="color:#FFA500"),value="Drug_Sensitivity",br(),
                                         
                                         # column(12,h3(plotOutput("compDrugsen_figure"))),
                                         uiOutput("compDrugsen_figure_unit"), #barplot    
@@ -3543,7 +3596,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("compDrugsen_finish")) 
                                ),
-                               tabPanel(tags$h5(tags$strong("Agreement"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Agreement"),align="center",style="color:#FFA500"),value="Agreement",br(),
                                         
                                         # column(12,h3(plotOutput("compAgree_figure"))),
                                         uiOutput("compAgree_figure_unit"), #barplot+alluvial diagram    
@@ -3571,8 +3624,9 @@ ui <- fluidPage(
                             
                                      fixedRow(
                                          #设置步骤选项,每个步骤对应不同的参数
-                                         column(12,radioButtons("runModuleStep", h5(strong("Steps")), inline=FALSE,
-                                                                choices = c("Run differential expression analysis"=1,"Run biomarker identification procedure"=2,"Run gene set enrichment analysis"=3,"Run gene set variation analysis"=4,"Run nearest template prediction"=5,"Run partition around medoids classifier"=6,"Run consistency evaluation using Kappa statistics"=7),selected=1))
+                                         column(11,radioButtons("runModuleStep", h5(strong("Steps")), inline=FALSE,
+                                                                choices = c("Run differential expression analysis"=1,"Run biomarker identification procedure"=2,"Run gene set enrichment analysis"=3,"Run gene set variation analysis"=4,"Run nearest template prediction"=5,"Run partition around medoids classifier"=6,"Run consistency evaluation using Kappa statistics"=7),selected=1)),
+                                         column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="1_RUN Module.pdf"))
                                      )
                            ),
                            
@@ -3580,7 +3634,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.runModuleStep==1",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Run differential expression analysis"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Run differential expression analysis"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="2_Run differential expression analysis.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("In this step, we will perform differential expression analysis using chosen algorithm (deseq2 or edger or limma) between two classes identified by multi-omics clustering process.",align="left")))),
                                                           
                                                           #Choose the algorithm for differential expression analysis
@@ -3611,7 +3666,8 @@ ui <- fluidPage(
                            conditionalPanel(condition="input.runModuleStep==2",
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Run biomarker identification procedure"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Run biomarker identification procedure"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="3_Run biomarker identification procedure.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step aims to identify uniquely and significantly expressed (overexpressed or downexpressed) biomarkers for each subtype identified by multi-omics clustering process. A template including top markers will be genearated for subtype external verification and a heatmap will also be generated.",align="left")))),
                                                           
                                                           #Indicate the algorithm for completed differential expression analysis
@@ -3667,7 +3723,9 @@ ui <- fluidPage(
                                                           column(12,radioButtons("halfwidth_runMarker", h5(strong("Assign marginal cutoff for truncating values in data or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=1)),
                                                           
                                                           #Marginal cutoff for truncating values in data
-                                                          column(12,numericInput("halfwidth_value_runMarker",label="Marginal cutoff for truncating values in data",min=0.5,value=3,step=0.5)),
+                                                          conditionalPanel(condition="input.halfwidth_runMarker==1",
+                                                                          column(12,numericInput("halfwidth_value_runMarker",label="Marginal cutoff for truncating values in data",min=0.5,value=3,step=0.5))
+                                                          ),
                                                           
                                                           ##Show rownames (feature names) in heatmap or not
                                                           column(12,radioButtons("runMarker_show_rownames", h5(strong("Show rownames (feature names) in heatmap or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=2)),
@@ -3712,7 +3770,8 @@ ui <- fluidPage(
                                             ##1.Prepare a gene set background file
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Prepare a gene set background file"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Prepare a gene set background file"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="4_Prepare a gene set background file.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("First we need to prepare a gene set background file for gene set enrichment analysis.",align="left")))),
                                                           
                                                           #The manner for gene set background file preparation
@@ -3741,7 +3800,8 @@ ui <- fluidPage(
                                             ##2.Perform gene set enrichment analysis
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Run gene set enrichment analysis"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Run gene set enrichment analysis"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="5_Run gene set enrichment analysis.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step aims to perform gene set enrichment analysis using a background file to identify subtype-specific (overexpressed or downexpressed) functional pathways for each subtype.",align="left")))),
                                                           
                                                           #Indicate the algorithm for completed differential expression analysis
@@ -3816,7 +3876,8 @@ ui <- fluidPage(
                                             ##1.Prepare a gene set list of interest
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Prepare a gene set list of interest"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Prepare a gene set list of interest"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="6_Prepare a gene set list of interest.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("First we need to prepare a gene set list of interest for gene set variation analysis.",align="left")))),
                                                           
                                                           #The manner for the gene set list of interest preparation
@@ -3844,7 +3905,8 @@ ui <- fluidPage(
                                             ##2.Perform gene set variation analysis
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Run gene set variation analysis"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Run gene set variation analysis"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="7_Run gene set variation analysis.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step aims to use gene set variation analysis to calculate enrichment score of each sample in each subtype based on a given gene set list of interest.",align="left")))),
                                                           
                                                           #Indicate the method to employ in the estimation of gene set enrichment scores per sample
@@ -3860,7 +3922,9 @@ ui <- fluidPage(
                                                           column(12,radioButtons("halfwidth_runGSVA", h5(strong("Assign marginal cutoff for truncating enrichment scores or not")), inline=TRUE, choices = c("Yes"=1,"No"=2),selected=1)),
                                                           
                                                           #Marginal cutoff for truncating enrichment scores
-                                                          column(12,numericInput("halfwidth_value_runGSVA",label="Marginal cutoff for truncating enrichment scores",min=0.5,value=1,step=0.5)),
+                                                          conditionalPanel(condition="input.halfwidth_runGSVA==1",
+                                                                           column(12,numericInput("halfwidth_value_runGSVA",label="Marginal cutoff for truncating enrichment scores",min=0.5,value=1,step=0.5))
+                                                          ),
                                                           
                                                           ##Sample annotations from survival information for heatmap
                                                           ###Sample annotations from survival information for heatmap or not
@@ -3938,7 +4002,8 @@ ui <- fluidPage(
                                             
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Run nearest template prediction"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Run nearest template prediction"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="8_Run nearest template prediction.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step aims to assign potential subtype labels on tcga or validation cohort using Nearest Template Prediction (NTP) based on predefined templates derived from current identified subtypes.",align="left")))),
                                                           
                                                           #Run nearest template prediction on tcga or validation cohort
@@ -4002,7 +4067,8 @@ ui <- fluidPage(
                                             
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Run partition around medoids classifier"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Run partition around medoids classifier"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="9_Run partition around medoids classifier.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step aims to use partition around medoids (PAM) classifier to predict potential subtype labels on tcga or validation cohort and calculate in-group proportions (IGP) statistics.",align="left")))),
                                                           
                                                           #Run partition around medoids classifier on tcga or validation cohort
@@ -4038,7 +4104,8 @@ ui <- fluidPage(
                                             #1.Choose the results you have obtained on tcga or validation cohort using NTP or PAM subtype prediction method
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Run consistency evaluation using Kappa statistics"),align="center",style="color:#834005")),
+                                                          column(11,tags$h4(strong("Run consistency evaluation using Kappa statistics"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="10_Run consistency evaluation using Kappa statistics.pdf")),
                                                           column(12,offset=0,tags$p(h5(strong("This step aims to calculate Kappa statistic to measure the consistency between two appraisements.",align="left")))),
                                                           # column(12,offset=0,tags$p(h5(strong("First let's choose the results you have obtained on tcga or validation cohort using NTP or PAM subtype prediction method:",align="left")))),
                                                           
@@ -4055,8 +4122,8 @@ ui <- fluidPage(
                                                 
                                                 wellPanel(style="background-color:#47AEE9",
                                                         fixedRow(
-                                                            column(12,tags$h4(strong("Run Kappa on tcga cohort (CMOIC vs NTP)"),align="center",style="color:#834005")),
-                                                            
+                                                            column(11,tags$h4(strong("Run Kappa on tcga cohort (CMOIC vs NTP)"),align="center",style="color:#834005")),
+                                                            column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="11_Run Kappa on tcga cohort (CMOIC vs NTP).pdf")),
                                                             #Indicate the label of the first subtype
                                                             column(12,textInput(inputId="subt1_lab_runKappa1",label="Indicate the label of the first subtype",value="CMOIC_TCGA")),
                                                             
@@ -4086,8 +4153,8 @@ ui <- fluidPage(
                                                  
                                                              wellPanel(style="background-color:#47AEE9",
                                                                        fixedRow(
-                                                                           column(12,tags$h4(strong("Run Kappa on tcga cohort (CMOIC vs PAM)"),align="center",style="color:#834005")),
-                                                                           
+                                                                           column(11,tags$h4(strong("Run Kappa on tcga cohort (CMOIC vs PAM)"),align="center",style="color:#834005")),
+                                                                           column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="12_Run Kappa on tcga cohort (CMOIC vs PAM).pdf")),
                                                                            #Indicate the label of the first subtype
                                                                            column(12,textInput(inputId="subt1_lab_runKappa2",label="Indicate the label of the first subtype",value="CMOIC_TCGA")),
                                                                            
@@ -4117,8 +4184,8 @@ ui <- fluidPage(
                                                              
                                                              wellPanel(style="background-color:#47AEE9",
                                                                        fixedRow(
-                                                                           column(12,tags$h4(strong("Run Kappa on tcga cohort (NTP vs PAM)"),align="center",style="color:#834005")),
-                                                                           
+                                                                           column(11,tags$h4(strong("Run Kappa on tcga cohort (NTP vs PAM)"),align="center",style="color:#834005")),
+                                                                           column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="13_Run Kappa on tcga cohort (NTP vs PAM).pdf")),
                                                                            #Indicate the label of the first subtype
                                                                            column(12,textInput(inputId="subt1_lab_runKappa3",label="Indicate the label of the first subtype",value="NTP_TCGA")),
                                                                            
@@ -4148,8 +4215,8 @@ ui <- fluidPage(
                                                              
                                                              wellPanel(style="background-color:#47AEE9",
                                                                        fixedRow(
-                                                                           column(12,tags$h4(strong("Run Kappa on validation cohort (NTP vs PAM)"),align="center",style="color:#834005")),
-                                                                           
+                                                                           column(11,tags$h4(strong("Run Kappa on validation cohort (NTP vs PAM)"),align="center",style="color:#834005")),
+                                                                           column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="14_Run Kappa on validation cohort (NTP vs PAM).pdf")),
                                                                            #Indicate the label of the first subtype
                                                                            column(12,textInput(inputId="subt1_lab_runKappa4",label="Indicate the label of the first subtype",value="NTP_Validation")),
                                                                            
@@ -4174,11 +4241,12 @@ ui <- fluidPage(
                                                              )
                                             ),
                                             
-                                            #All steps in MOVICS have been finished
+                                            #All steps in MOVICShiny have been finished
                                             wellPanel(style="background-color:#47AEE9",
                                                       fixedRow(
-                                                          column(12,tags$h4(strong("Finish"),align="center",style="color:#834005")),
-                                                          column(12,offset=0,tags$p(h5(strong("All steps in MOVICS have been finished!",align="left")))),
+                                                          column(11,tags$h4(strong("Finish"),align="center",style="color:#834005")),
+                                                          column(1,a(tags$h4(strong(icon("question-circle")),align="right",style="color:orange"),target="_blank",href="15_Finish.pdf")),
+                                                          column(12,offset=0,tags$p(h5(strong("All steps in MOVICShiny have been finished!",align="left")))),
                                                           column(12,actionButton("MOVICS_finish_process","Finish",width="100%",class="btn btn-primary"))            
                                                       )
                                             )
@@ -4186,8 +4254,8 @@ ui <- fluidPage(
                     ),
                     br(),
                     column(7,
-                           tabsetPanel(
-                               tabPanel(tags$h5(tags$strong("DEA"),align="center",style="color:#FFA500"),br(),
+                           tabsetPanel(id="RUN_Module_Results",
+                               tabPanel(tags$h5(tags$strong("DEA"),align="center",style="color:#FFA500"),value="DEA",br(),
                                         
                                         uiOutput("table.runDEATitle"), #标题
                                         column(12,br()),
@@ -4196,7 +4264,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("runDEA_finish"))        
                                ),
-                               tabPanel(tags$h5(tags$strong("Biomarkers Identification"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Biomarkers Identification"),align="center",style="color:#FFA500"),value="Biomarkers_Identification",br(),
                                         
                                         # column(12,h3(plotOutput("runMarker_figure"))),
                                         uiOutput("runMarker_figure_unit"), #heatmap  
@@ -4208,7 +4276,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("runMarker_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("GSEA"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("GSEA"),align="center",style="color:#FFA500"),value="GSEA",br(),
                                         
                                         column(12,uiOutput("gsea_geneset_background_preparation_finish2")),
                                         column(12,uiOutput("gsea_geneset_background_preparation_finish3")),
@@ -4228,7 +4296,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("runGSEA_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("GSVA"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("GSVA"),align="center",style="color:#FFA500"),value="GSVA",br(),
                                         
                                         column(12,uiOutput("gsva_geneset_interest_preparation_finish2")),
                                         column(12,uiOutput("gsva_geneset_interest_preparation_finish3")),
@@ -4248,7 +4316,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("runGSVA_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("NTP"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("NTP"),align="center",style="color:#FFA500"),value="NTP",br(),
                                         
                                         # column(12,h3(plotOutput("runNTP_figure"))),
                                         uiOutput("runNTP_figure_unit"), #heatmap  
@@ -4260,7 +4328,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("runNTP_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("PAM"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("PAM"),align="center",style="color:#FFA500"),value="PAM",br(),
                                         
                                         uiOutput("table.pamIGPTitle"), #标题1
                                         column(12,br()),
@@ -4274,7 +4342,7 @@ ui <- fluidPage(
                                         br(),br(),
                                         column(12,uiOutput("runPAM_finish"))
                                ),
-                               tabPanel(tags$h5(tags$strong("Kappa Statistics"),align="center",style="color:#FFA500"),br(),
+                               tabPanel(tags$h5(tags$strong("Kappa Statistics"),align="center",style="color:#FFA500"),value="Kappa_Statistics",br(),
                                         
                                         # column(12,h3(plotOutput("runKappa_figure1"))),
                                         uiOutput("runKappa_figure_unit1"), #consistency heatmap(CMOIC_VS_NTP_TCGA)  

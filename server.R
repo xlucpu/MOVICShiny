@@ -1,4 +1,4 @@
-#MOVICS_RShiny是在root环境下运行的,查看相应设置时请用root用户登录查看
+#MOVICShiny是在root环境下运行的,查看相应设置时请用root用户登录查看
 #包在服务器上的安装路径为:"/usr/local/lib/R/site-library"
 library(shiny)
 library(shinyBS)
@@ -35,6 +35,7 @@ library(CMScaller)
 library(pamr)
 library(clusterRepro)
 library(limma)
+library(spsComps)
 #library(filesstrings) #安装的话使用github安装install_github('rorynolan/filesstrings')
 source("getClustNums.R")
 source("getSilhouettes.R")
@@ -62,6 +63,8 @@ options(timeout = 360000,shiny.maxRequestSize=30000*1024^2) #设置文件上传�
 
 shinyServer(function(input, output, session) {
     
+  
+  
     #1.cancerType填写表格
     output$table.cancerType<-renderRHandsontable({
         
@@ -356,12 +359,13 @@ shinyServer(function(input, output, session) {
     })
     
     #15.用户创建按钮
-    observeEvent(input$basic_create1,{
-        
+    observeEvent(input$basic_create1,shinyCatch({
+      
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")  
       #Basic Settings
       ##设置工作目录
-      # setwd("C:\\Users\\LEGION\\Desktop\\MOVICS_RShiny\\workingDirectory") #本地测试目录
-      # setwd("/shinyapps/MOVICS_RShiny/workingDirectory") #服务器测试目录
+      # setwd("C:\\Users\\LEGION\\Desktop\\MOVICShiny\\workingDirectory") #本地测试目录
+      # setwd("/shinyapps/MOVICShiny/workingDirectory") #服务器测试目录
       setwd("/srv/shiny-server/workingDirectory") #服务器测试目录
       workdir <- getwd()
       workdir_origin <- workdir
@@ -398,9 +402,9 @@ shinyServer(function(input, output, session) {
         
         if((username %in% usersInfo$user_name) & (sam %in% usersInfo$user_account)){
           if(input$log_in_first_time==1){
-            list(br(),column(12,h3(strong(paste0("Welcome to MOVICS RShiny! Your user account is ",sam,". Now let's start preaparing tcga datasets first."))),style="color:darkblack"))
+            list(br(),column(12,h3(strong(paste0("Welcome to MOVICShiny! Your user account is ",sam,". Now let's start preaparing tcga datasets first."))),style="color:darkblack"))
           }else{
-            list(br(),column(12,h3(strong(paste0("Welcome back MOVICS RShiny! Your user account is ",sam,". Now you need to specify 'The Number of Cancer Types', 'Input Cancer Types From TCGA', 'Project Name', 'Multi-omics Types' in TCGA datasets preparation, 'Multi-omics Types' in Validation datasets preparation, 'Clustering algorithms' and 'The number of clusters' in Consensus Clustering first. The values of these parameters need to be the same as previously set. After that, you can keep on analysis."))),style="color:darkblack"))
+            list(br(),column(12,h3(strong(paste0("Welcome back MOVICShiny! Your user account is ",sam,". Now you need to specify 'The Number of Cancer Types', 'Input Cancer Types From TCGA', 'Project Name', 'Multi-omics Types' in TCGA datasets preparation, 'Multi-omics Types' in Validation datasets preparation, 'Clustering algorithms' and 'The number of clusters' in Consensus Clustering first. The values of these parameters need to be the same as previously set. After that, you can keep on analysis."))),style="color:darkblack"))
           }
         }else{
           list(br(),column(12,h3(strong("The system detected that the 'Username' or 'User Account' you entered was not correct, please check and enter again. If you do not have a 'Username' or a 'User Account', please write an application mail to 'xlu.cpu@foxmail.com' (Name, Affiliation, purpose, etc.).")),style="color:darkblack"))
@@ -409,14 +413,15 @@ shinyServer(function(input, output, session) {
       
       # rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
-    observeEvent(input$basic_create2,{
+    observeEvent(input$basic_create2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       #Basic Settings
       ##设置工作目录
-      # setwd("C:\\Users\\LEGION\\Desktop\\MOVICS_RShiny\\workingDirectory") #本地测试目录
-      # setwd("/shinyapps/MOVICS_RShiny/workingDirectory") #服务器测试目录
+      # setwd("C:\\Users\\LEGION\\Desktop\\MOVICShiny\\workingDirectory") #本地测试目录
+      # setwd("/shinyapps/MOVICShiny/workingDirectory") #服务器测试目录
       setwd("/srv/shiny-server/workingDirectory") #服务器测试目录
       workdir <- getwd()
       workdir_origin <- workdir
@@ -453,9 +458,9 @@ shinyServer(function(input, output, session) {
         
         if((username %in% usersInfo$user_name) & (sam %in% usersInfo$user_account)){
           if(input$log_in_first_time==1){
-            list(br(),column(12,h3(strong(paste0("Welcome to MOVICS RShiny! Your user account is ",sam,". Now let's start preaparing tcga datasets first."))),style="color:darkblack"))
+            list(br(),column(12,h3(strong(paste0("Welcome to MOVICShiny! Your user account is ",sam,". Now let's start preaparing tcga datasets first."))),style="color:darkblack"))
           }else{
-            list(br(),column(12,h3(strong(paste0("Welcome back MOVICS RShiny! Your user account is ",sam,". Now you need to specify 'The Number of Cancer Types', 'Input Cancer Types From TCGA', 'Project Name', 'Multi-omics Types' in TCGA datasets preparation, 'Multi-omics Types' in Validation datasets preparation, 'Clustering algorithms' and 'The number of clusters' in Consensus Clustering first. The values of these parameters need to be the same as previously set. After that, you can keep on analysis."))),style="color:darkblack"))
+            list(br(),column(12,h3(strong(paste0("Welcome back MOVICShiny! Your user account is ",sam,". Now you need to specify 'The Number of Cancer Types', 'Input Cancer Types From TCGA', 'Project Name', 'Multi-omics Types' in TCGA datasets preparation, 'Multi-omics Types' in Validation datasets preparation, 'Clustering algorithms' and 'The number of clusters' in Consensus Clustering first. The values of these parameters need to be the same as previously set. After that, you can keep on analysis."))),style="color:darkblack"))
           }
         }else{
           list(br(),column(12,h3(strong("The system detected that the 'Username' or 'User Account' you entered was not correct, please check and enter again. If you do not have a 'Username' or a 'User Account', please write an application mail to 'xlu.cpu@foxmail.com' (Name, Affiliation, purpose, etc.).")),style="color:darkblack"))
@@ -464,14 +469,15 @@ shinyServer(function(input, output, session) {
       
       # rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
-    observeEvent(input$basic_create3,{
+    observeEvent(input$basic_create3,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       #Basic Settings
       ##设置工作目录
-      # setwd("C:\\Users\\LEGION\\Desktop\\MOVICS_RShiny\\workingDirectory") #本地测试目录
-      # setwd("/shinyapps/MOVICS_RShiny/workingDirectory") #服务器测试目录
+      # setwd("C:\\Users\\LEGION\\Desktop\\MOVICShiny\\workingDirectory") #本地测试目录
+      # setwd("/shinyapps/MOVICShiny/workingDirectory") #服务器测试目录
       setwd("/srv/shiny-server/workingDirectory") #服务器测试目录
       workdir <- getwd()
       workdir_origin <- workdir
@@ -508,9 +514,9 @@ shinyServer(function(input, output, session) {
         
         if((username %in% usersInfo$user_name) & (sam %in% usersInfo$user_account)){
           if(input$log_in_first_time==1){
-            list(br(),column(12,h3(strong(paste0("Welcome to MOVICS RShiny! Your user account is ",sam,". Now let's start preaparing tcga datasets first."))),style="color:darkblack"))
+            list(br(),column(12,h3(strong(paste0("Welcome to MOVICShiny! Your user account is ",sam,". Now let's start preaparing tcga datasets first."))),style="color:darkblack"))
           }else{
-            list(br(),column(12,h3(strong(paste0("Welcome back MOVICS RShiny! Your user account is ",sam,". Now you need to specify 'The Number of Cancer Types', 'Input Cancer Types From TCGA', 'Project Name', 'Multi-omics Types' in TCGA datasets preparation, 'Multi-omics Types' in Validation datasets preparation, 'Clustering algorithms' and 'The number of clusters' in Consensus Clustering first. The values of these parameters need to be the same as previously set. After that, you can keep on analysis."))),style="color:darkblack"))
+            list(br(),column(12,h3(strong(paste0("Welcome back MOVICShiny! Your user account is ",sam,". Now you need to specify 'The Number of Cancer Types', 'Input Cancer Types From TCGA', 'Project Name', 'Multi-omics Types' in TCGA datasets preparation, 'Multi-omics Types' in Validation datasets preparation, 'Clustering algorithms' and 'The number of clusters' in Consensus Clustering first. The values of these parameters need to be the same as previously set. After that, you can keep on analysis."))),style="color:darkblack"))
           }
         }else{
           list(br(),column(12,h3(strong("The system detected that the 'Username' or 'User Account' you entered was not correct, please check and enter again. If you do not have a 'Username' or a 'User Account', please write an application mail to 'xlu.cpu@foxmail.com' (Name, Affiliation, purpose, etc.).")),style="color:darkblack"))
@@ -519,11 +525,12 @@ shinyServer(function(input, output, session) {
       
       # rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #16.使用已整合数据处理按钮(TCGA)
-    observeEvent(input$use_integrated_datasets_process,{
+    observeEvent(input$use_integrated_datasets_process,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$use_integrated_datasets_approaches==1,"Download integrated tcga datasets (.RData) using specified url","Upload integrated tcga datasets (.RData)"),
@@ -562,24 +569,25 @@ shinyServer(function(input, output, session) {
           if(input$external_validation==1){
             list(br(),column(12,h3(strong("The tcga integrated dataset (.RData) has been downloaded in the corresponding folder. Now let's start to prepare validation datasets.")),style="color:darkblack"))
           }else{
-            list(br(),column(12,h3(strong("The tcga integrated dataset (.RData) has been downloaded in the corresponding folder. Now let's start the first step of MOVICS--GET Module!")),style="color:darkblack"))
+            list(br(),column(12,h3(strong("The tcga integrated dataset (.RData) has been downloaded in the corresponding folder. Now let's start the first step of MOVICShiny--GET Module!")),style="color:darkblack"))
           }
         }else{
           if(input$external_validation==1){
             list(br(),column(12,h3(strong("The tcga integrated dataset (.RData) has been uploaded in the corresponding folder. Now let's start to prepare validation datasets.")),style="color:darkblack"))
           }else{
-            list(br(),column(12,h3(strong("The tcga integrated dataset (.RData) has been uploaded in the corresponding folder. Now let's start the first step of MOVICS--GET Module!")),style="color:darkblack"))
+            list(br(),column(12,h3(strong("The tcga integrated dataset (.RData) has been uploaded in the corresponding folder. Now let's start the first step of MOVICShiny--GET Module!")),style="color:darkblack"))
           }
         }
       })
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #17.验证数据目录创建按钮
-    observeEvent(input$validation_basic_create,{
+    observeEvent(input$validation_basic_create,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       ##设置验证数据目录
       workdir <- getwd() #获取当前工作路径
       workdir_origin <- paste(unlist(strsplit(workdir,"/"))[1:(length(unlist(strsplit(workdir,"/")))-2)],collapse = "/") #获取总工作目录的路径
@@ -606,11 +614,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       # rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #18.使用已整合数据处理按钮(验证数据)
-    observeEvent(input$validation_use_integrated_datasets_process,{
+    observeEvent(input$validation_use_integrated_datasets_process,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$validation_use_integrated_datasets_approaches==1,"Download integrated validation datasets (.RData) using specified url","Upload integrated validation datasets (.RData)"),
@@ -650,20 +659,21 @@ shinyServer(function(input, output, session) {
       #已整合验证数据处理好后给予用户的反馈提示
       output$validation_use_integrated_datasets_finish<-renderUI({
         if(input$validation_use_integrated_datasets_approaches==1){
-          list(br(),column(12,h3(strong("The validation integrated dataset (.RData) has been downloaded in the corresponding folder. Now let's start the first step of MOVICS--GET Module!")),style="color:darkblack"))
+          list(br(),column(12,h3(strong("The validation integrated dataset (.RData) has been downloaded in the corresponding folder. Now let's start the first step of MOVICShiny--GET Module!")),style="color:darkblack"))
         }else{
-          list(br(),column(12,h3(strong("The validation integrated dataset (.RData) has been uploaded in the corresponding folder. Now let's start the first step of MOVICS--GET Module!")),style="color:darkblack"))
+          list(br(),column(12,h3(strong("The validation integrated dataset (.RData) has been uploaded in the corresponding folder. Now let's start the first step of MOVICShiny--GET Module!")),style="color:darkblack"))
         }
       })
       
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #19.内置数据处理按钮
-    observeEvent(input$basic_process,{
+    observeEvent(input$basic_process,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=3) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Extract and process datasets from internal resources',
@@ -1372,10 +1382,10 @@ shinyServer(function(input, output, session) {
       output$internal_process_finish<-renderUI({
         
         if(!(6 %in% input$multiOmics)){
-          list(br(),column(12,h3(strong("Now all omics datasets you specified for tcga cohort have been well prepared, and you can download what you want below. Then we will turn to integrate all omics datasets for tcga cohort."))),style="color:darkblack",br(),
+          list(br(),column(12,h3(strong("Now all omics datasets you specified for tcga cohort have been well prepared, and you can download what you want below. Then we will turn to integrate all omics datasets for tcga cohort.")),style="color:darkblack"),br(),
                column(12,downloadButton("internal_datalist_download",strong("Download RData file of internal datasets before integration"),style="background-color:#47AEE9"))) ###下载按钮
         }else{
-          list(br(),column(12,h3(strong("Internal datasets have been well prepared, and you can download what you want below. Next, we will turn to prepare radiomics datasets if you have specified."))),style="color:darkblack",br(),
+          list(br(),column(12,h3(strong("Internal datasets have been well prepared, and you can download what you want below. Next, we will turn to prepare radiomics datasets if you have specified.")),style="color:darkblack"),br(),
                column(12,downloadButton("internal_datalist_download",strong("Download RData file of internal datasets before integration"),style="background-color:#47AEE9"))) ###下载按钮
         }
       })
@@ -1383,11 +1393,12 @@ shinyServer(function(input, output, session) {
       #rm(list=ls()) #清空变量
       gc() #释放内存
       
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #20.临床生存数据集自动下载处理按钮
-    observeEvent(input$cli_sur_process1,{
+    observeEvent(input$cli_sur_process1,shinyCatch({
         
+        updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
         progress <- Progress$new(session, min=1, max=4) #设置进度条
         on.exit(progress$close())
         progress$set(message = 'Download Clinical & Survival datasets automatically',
@@ -1478,11 +1489,12 @@ shinyServer(function(input, output, session) {
         
         #rm(list=ls()) #清空变量
         gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #21.临床生存数据集链接下载处理按钮
-    observeEvent(input$cli_sur_process2,{
+    observeEvent(input$cli_sur_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download Clinical & Survival datasets using specified urls',
@@ -1635,7 +1647,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     # #文件上传控件测试代码
     # output$files <- renderTable(input$cli_sur_fileUpload2)
@@ -1646,8 +1658,9 @@ shinyServer(function(input, output, session) {
     
     
     #22.临床生存数据集链接下载处理按钮(验证数据集)
-    observeEvent(input$validation_cli_sur_process1,{
+    observeEvent(input$validation_cli_sur_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download Clinical & Survival(Validation) datasets using specified urls',
@@ -1804,11 +1817,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #23.临床生存数据集上传处理按钮
-    observeEvent(input$cli_sur_process3,{
+    observeEvent(input$cli_sur_process3,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload downloaded Clinical & Survival datasets from local paths',
@@ -1961,11 +1975,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #24.临床生存数据集上传处理按钮(验证数据集)
-    observeEvent(input$validation_cli_sur_process2,{
+    observeEvent(input$validation_cli_sur_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload downloaded Clinical & Survival(Validation) datasets from local paths',
@@ -2123,11 +2138,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #25.RNA数据集自动下载处理按钮
-    observeEvent(input$RNA_process1,{
+    observeEvent(input$RNA_process1,shinyCatch({
         
+        updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
         progress <- Progress$new(session, min=1, max=4) #设置进度条
         on.exit(progress$close())
         progress$set(message = paste0("Download ",ifelse((1 %in% input$multiOmics) & (2 %in% input$multiOmics),"mRNA & lncRNA",ifelse(1 %in% input$multiOmics,"mRNA","lncRNA"))," datasets automatically"),
@@ -2363,11 +2379,12 @@ shinyServer(function(input, output, session) {
         
         #rm(list=ls()) #清空变量
         gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #26.RNA数据集链接下载处理按钮
-    observeEvent(input$RNA_process2,{
+    observeEvent(input$RNA_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = paste0("Download ",ifelse((1 %in% input$multiOmics) & (2 %in% input$multiOmics),"mRNA & lncRNA",ifelse(1 %in% input$multiOmics,"mRNA","lncRNA"))," datasets using specified urls"),
@@ -2972,11 +2989,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #27.RNA数据集链接下载处理按钮(验证数据集)
-    observeEvent(input$validation_RNA_process1,{
+    observeEvent(input$validation_RNA_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = paste0("Download ",ifelse((1 %in% input$multiOmics) & (2 %in% input$multiOmics),"mRNA & lncRNA(Validation)",ifelse(1 %in% input$multiOmics,"mRNA(Validation)","lncRNA(Validation)"))," datasets using specified urls"),
@@ -3587,11 +3605,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #28.RNA数据集文件上传处理按钮
-    observeEvent(input$RNA_process3,{
+    observeEvent(input$RNA_process3,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = paste0("Upload downloaded ",ifelse((1 %in% input$multiOmics) & (2 %in% input$multiOmics),"mRNA & lncRNA",ifelse(1 %in% input$multiOmics,"mRNA","lncRNA"))," datasets from local paths"),
@@ -4196,11 +4215,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #29.RNA数据集文件上传处理按钮(验证数据集)
-    observeEvent(input$validation_RNA_process2,{
+    observeEvent(input$validation_RNA_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = paste0("Upload downloaded ",ifelse((1 %in% input$multiOmics) & (2 %in% input$multiOmics),"mRNA & lncRNA(Validation)",ifelse(1 %in% input$multiOmics,"mRNA(Validation)","lncRNA(Validation)"))," datasets from local paths"),
@@ -4810,11 +4830,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #30.DNA methylation数据集自动下载处理按钮
-    observeEvent(input$DNA_methylation_process1,{
+    observeEvent(input$DNA_methylation_process1,shinyCatch({
         
+        updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
         progress <- Progress$new(session, min=1, max=3) #设置进度条
         on.exit(progress$close())
         progress$set(message = 'Download DNA methylation dataset automatically',
@@ -4898,11 +4919,12 @@ shinyServer(function(input, output, session) {
         
         #rm(list=ls()) #清空变量
         gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #31.DNA methylation数据集链接下载处理按钮
-    observeEvent(input$DNA_methylation_process2,{
-      
+    observeEvent(input$DNA_methylation_process2,shinyCatch({
+        
+        updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
         progress <- Progress$new(session, min=1, max=4) #设置进度条
         on.exit(progress$close())
         progress$set(message = 'Download DNA methylation dataset using specified urls',
@@ -5031,11 +5053,12 @@ shinyServer(function(input, output, session) {
         #rm(list=ls()) #清空变量
         gc() #释放内存
     
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #32.DNA methylation数据集链接下载处理按钮(验证数据集)
-    observeEvent(input$validation_DNA_methylation_process1,{
+    observeEvent(input$validation_DNA_methylation_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download DNA methylation(Validation) dataset using specified urls',
@@ -5168,11 +5191,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #33.DNA methylation数据集文件上传处理按钮
-    observeEvent(input$DNA_methylation_process3,{
+    observeEvent(input$DNA_methylation_process3,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       # data.table::setDTthreads(threads = 1) #设置程序运行线程为1
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
@@ -5300,11 +5324,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #34.DNA methylation数据集文件上传处理按钮(验证数据集)
-    observeEvent(input$validation_DNA_methylation_process2,{
+    observeEvent(input$validation_DNA_methylation_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       # data.table::setDTthreads(threads = 1) #设置程序运行线程为1
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
@@ -5437,11 +5462,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #35.copy number alterations数据集自动下载处理按钮
-    observeEvent(input$copy_number_alterations_process1,{
+    observeEvent(input$copy_number_alterations_process1,shinyCatch({
         
+        updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
         progress <- Progress$new(session, min=1, max=3) #设置进度条
         on.exit(progress$close())
         progress$set(message = 'Download copy number alterations dataset automatically',
@@ -5540,11 +5566,12 @@ shinyServer(function(input, output, session) {
         
         #rm(list=ls()) #清空变量
         gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #36.copy number alterations数据集链接下载处理按钮
-    observeEvent(input$copy_number_alterations_process2,{
-      
+    observeEvent(input$copy_number_alterations_process2,shinyCatch({
+        
+        updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
         progress <- Progress$new(session, min=1, max=4) #设置进度条
         on.exit(progress$close())
         progress$set(message = 'Download copy number alterations dataset using specified urls',
@@ -5691,11 +5718,12 @@ shinyServer(function(input, output, session) {
         #rm(list=ls()) #清空变量
         gc() #释放内存
         
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #37.copy number alterations数据集链接下载处理按钮(验证数据集)
-    observeEvent(input$validation_copy_number_alterations_process1,{
+    observeEvent(input$validation_copy_number_alterations_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download copy number alterations(Validation) dataset using specified urls',
@@ -5846,11 +5874,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #38.copy number alterations数据集文件上传处理按钮
-    observeEvent(input$copy_number_alterations_process3,{
+    observeEvent(input$copy_number_alterations_process3,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload downloaded copy number alterations datasets from local paths',
@@ -5995,11 +6024,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #39.copy number alterations数据集文件上传处理按钮(验证数据集)
-    observeEvent(input$validation_copy_number_alterations_process2,{
+    observeEvent(input$validation_copy_number_alterations_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload downloaded copy number alterations(Validation) datasets from local paths',
@@ -6150,11 +6180,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #40.binary somatic mutation数据集自动下载按钮
-    observeEvent(input$binary_somatic_mutation_process1,{
+    observeEvent(input$binary_somatic_mutation_process1,shinyCatch({
       
+        updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
         progress <- Progress$new(session, min=1, max=3) #设置进度条
         on.exit(progress$close())
         progress$set(message = 'Download binary somatic mutation dataset automatically',
@@ -6317,11 +6348,12 @@ shinyServer(function(input, output, session) {
         
         #rm(list=ls()) #清空变量
         gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #41.binary somatic mutation数据集链接下载按钮
-    observeEvent(input$binary_somatic_mutation_process2,{
+    observeEvent(input$binary_somatic_mutation_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download binary somatic mutation dataset using specified urls',
@@ -6566,11 +6598,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
 
     #42.binary somatic mutation数据集链接下载按钮(验证数据集)
-    observeEvent(input$validation_binary_somatic_mutation_process1,{
+    observeEvent(input$validation_binary_somatic_mutation_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download binary somatic mutation(Validation) dataset using specified urls',
@@ -6820,11 +6853,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #43.binary somatic mutation数据集文件上传处理按钮
-    observeEvent(input$binary_somatic_mutation_process3,{
+    observeEvent(input$binary_somatic_mutation_process3,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload downloaded binary somatic mutation datasets from local paths',
@@ -7070,11 +7104,12 @@ shinyServer(function(input, output, session) {
       #rm(list=ls()) #清空变量
       gc() #释放内存
       
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #44.binary somatic mutation数据集文件上传处理按钮(验证数据集)
-    observeEvent(input$validation_binary_somatic_mutation_process2,{
+    observeEvent(input$validation_binary_somatic_mutation_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload downloaded binary somatic mutation(Validation) datasets from local paths',
@@ -7325,11 +7360,12 @@ shinyServer(function(input, output, session) {
       #rm(list=ls()) #清空变量
       gc() #释放内存
       
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #45.radiomics数据集链接下载处理按钮(Internal)
-    observeEvent(input$internal_radiomics_process1,{
+    observeEvent(input$internal_radiomics_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download radiomics dataset using specified urls',
@@ -7427,11 +7463,12 @@ shinyServer(function(input, output, session) {
       #rm(list=ls()) #清空变量
       gc() #释放内存
       
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #46.radiomics数据集链接下载处理按钮(External)
-    observeEvent(input$external_radiomics_process1,{
+    observeEvent(input$external_radiomics_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download radiomics dataset using specified urls',
@@ -7529,11 +7566,12 @@ shinyServer(function(input, output, session) {
       #rm(list=ls()) #清空变量
       gc() #释放内存
       
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #47.radiomics数据集链接下载处理按钮(External)(验证数据集)
-    observeEvent(input$validation_external_radiomics_process1,{
+    observeEvent(input$validation_external_radiomics_process1,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download radiomics dataset using specified urls',
@@ -7635,11 +7673,12 @@ shinyServer(function(input, output, session) {
       #rm(list=ls()) #清空变量
       gc() #释放内存
       
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #48.radiomics数据集文件上传处理按钮(Internal)
-    observeEvent(input$internal_radiomics_process2,{
+    observeEvent(input$internal_radiomics_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       # data.table::setDTthreads(threads = 1) #设置程序运行线程为1
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
@@ -7737,11 +7776,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #49.radiomics数据集文件上传处理按钮(External)
-    observeEvent(input$external_radiomics_process2,{
+    observeEvent(input$external_radiomics_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_TCGA")
       # data.table::setDTthreads(threads = 1) #设置程序运行线程为1
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
@@ -7839,11 +7879,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #50.radiomics数据集文件上传处理按钮(External)(验证数据集)
-    observeEvent(input$validation_external_radiomics_process2,{
+    observeEvent(input$validation_external_radiomics_process2,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Preparation_Validation")
       # data.table::setDTthreads(threads = 1) #设置程序运行线程为1
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
@@ -7945,11 +7986,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #51.TCGA数据集整合处理按钮
-    observeEvent(input$datasets_integrate,{
+    observeEvent(input$datasets_integrate,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Integration_TCGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Integrate specified omics datasets and extra datasets (TCGA)',
@@ -8140,11 +8182,11 @@ shinyServer(function(input, output, session) {
         
         if(input$external_validation==1){
           ##有外部验证数据集
-          list(br(),column(12,h3(strong("All specified omics datasets and extra datasets from TCGA cohort have been integrated into a list for the following MOVICS pipeline, and you can download and check the obtained files you want below. Now let's start to prepare validation datasets.")),style="color:darkblack"),br(),
+          list(br(),column(12,h3(strong("All specified omics datasets and extra datasets from TCGA cohort have been integrated into a list for the following MOVICShiny pipeline, and you can download and check the obtained files you want below. Now let's start to prepare validation datasets.")),style="color:darkblack"),br(),
                column(12,downloadButton("datasets_integration_download",strong("Download RData file of integrated datasets"),style="background-color:#47AEE9"))) ###下载按钮
         }else{
           ##无外部验证数据集
-          list(br(),column(12,h3(strong("All specified omics datasets and extra datasets from TCGA cohort have been integrated into a list for the following MOVICS pipeline, and you can download and check the obtained files you want below. Now let's start the first step of MOVICS--GET Module!")),style="color:darkblack"),br(),
+          list(br(),column(12,h3(strong("All specified omics datasets and extra datasets from TCGA cohort have been integrated into a list for the following MOVICShiny pipeline, and you can download and check the obtained files you want below. Now let's start the first step of MOVICShiny--GET Module!")),style="color:darkblack"),br(),
                column(12,downloadButton("datasets_integration_download",strong("Download RData file of integrated datasets"),style="background-color:#47AEE9"))) ###下载按钮
         }
       })
@@ -8877,11 +8919,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #52.数据集整合处理按钮(验证数据集)
-    observeEvent(input$validation_datasets_integrate,{
+    observeEvent(input$validation_datasets_integrate,shinyCatch({
       
+      updateTabsetPanel(session,"Data_Preparation_Results",selected="Data_Integration_Validation")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Integrate specified omics datasets and extra datasets (Validation)',
@@ -9076,7 +9119,7 @@ shinyServer(function(input, output, session) {
       #数据整理好后给予用户的反馈提示
       output$validation_datasets_integration_finish<-renderUI({
         
-        list(br(),column(12,h3(strong("All specified omics datasets and extra datasets from validation cohort have been integrated into a list for the following MOVICS pipeline, and you can download and check the obtained files you want below. Now let's start the first step of MOVICS--GET Module!")),style="color:darkblack"),br(),
+        list(br(),column(12,h3(strong("All specified omics datasets and extra datasets from validation cohort have been integrated into a list for the following MOVICShiny pipeline, and you can download and check the obtained files you want below. Now let's start the first step of MOVICShiny--GET Module!")),style="color:darkblack"),br(),
              column(12,downloadButton("validation_datasets_integration_download",strong("Download RData file of integrated datasets"),style="background-color:#47AEE9"))) ###下载按钮
       })
       
@@ -9809,11 +9852,12 @@ shinyServer(function(input, output, session) {
       setwd(workdir) #将工作目录修改回TCGA的数据存储目录
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #53.Get Elites事件响应按钮
-    observeEvent(input$Get_Elites_process,{
+    observeEvent(input$Get_Elites_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Get_Elites")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$tcga_vali_getElites==1,'Get Elites on tcga datasets for specified omics datasets','Get Elites on validation datasets for specified omics datasets'),
@@ -11431,11 +11475,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #54.Get Clustering Number事件响应按钮
-    observeEvent(input$getClusteringNumber_process,{
+    observeEvent(input$getClusteringNumber_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Get_Clustering_Number")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Get Clustering Number',
@@ -11612,7 +11657,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #55.The number of neighbors for each omic(NEMO)填写表格
     output$NEMO_numNeighbors2<-renderRHandsontable({
@@ -11790,8 +11835,9 @@ shinyServer(function(input, output, session) {
     })
     
     #60.iClusterBayes_process事件响应按钮
-    observeEvent(input$iClusterBayes_process,{
+    observeEvent(input$iClusterBayes_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using iClusterBayes algorithm',
@@ -11903,11 +11949,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #61.SNF_process事件响应按钮
-    observeEvent(input$SNF_process,{
+    observeEvent(input$SNF_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using SNF algorithm',
@@ -11987,11 +12034,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #62.PINSPlus_process事件响应按钮
-    observeEvent(input$PINSPlus_process,{
+    observeEvent(input$PINSPlus_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using PINSPlus algorithm',
@@ -12089,11 +12137,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #63.NEMO_process事件响应按钮
-    observeEvent(input$NEMO_process,{
+    observeEvent(input$NEMO_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using NEMO algorithm',
@@ -12173,11 +12222,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #64.COCA_process事件响应按钮
-    observeEvent(input$COCA_process,{
+    observeEvent(input$COCA_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using COCA algorithm',
@@ -12255,11 +12305,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #65.LRAcluster_process事件响应按钮
-    observeEvent(input$LRAcluster_process,{
+    observeEvent(input$LRAcluster_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using LRAcluster algorithm',
@@ -12332,11 +12383,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #66.ConsensusClustering_process事件响应按钮
-    observeEvent(input$ConsensusClustering_process,{
+    observeEvent(input$ConsensusClustering_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using ConsensusClustering algorithm',
@@ -12487,11 +12539,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #67.IntNMF_process事件响应按钮
-    observeEvent(input$IntNMF_process,{
+    observeEvent(input$IntNMF_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using IntNMF algorithm',
@@ -12559,11 +12612,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #68.CIMLR_process事件响应按钮
-    observeEvent(input$CIMLR_process,{
+    observeEvent(input$CIMLR_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using CIMLR algorithm',
@@ -12639,11 +12693,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #69.MoCluster_process事件响应按钮
-    observeEvent(input$MoCluster_process,{
+    observeEvent(input$MoCluster_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using MoCluster algorithm',
@@ -12776,11 +12831,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #70.consensus_clustering_process1事件响应按钮
-    observeEvent(input$consensus_clustering_process1,{
+    observeEvent(input$consensus_clustering_process1,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Clustering using multiple specified algorithms',
@@ -12855,11 +12911,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #71.consensus_clustering_process2事件响应按钮
-    observeEvent(input$consensus_clustering_process2,{
+    observeEvent(input$consensus_clustering_process2,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Consensus_Clustering")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Get consensus from different algorithms and plot consensus heatmap',
@@ -12987,7 +13044,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-   })
+   }, blocking_level = "error",trace_back = TRUE))
   
     #72.Colors for annotating each cluster填写表格
     output$table.silhouette_clustcolor<-renderRHandsontable({
@@ -13025,8 +13082,9 @@ shinyServer(function(input, output, session) {
     })  
     
     #73.silhouette_process事件响应按钮
-    observeEvent(input$silhouette_process,{
+    observeEvent(input$silhouette_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Silhouette")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Visualize silhouette information from consensus clustering',
@@ -13121,7 +13179,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #74.Indicate if each omic data should be centered填写表格
     output$table.centerFlag_heatmap<-renderRHandsontable({
@@ -13803,8 +13861,9 @@ shinyServer(function(input, output, session) {
     })
     
     #97.heatmap_process事件响应按钮
-    observeEvent(input$heatmap_process,{
+    observeEvent(input$heatmap_process,shinyCatch({
       
+      updateTabsetPanel(session,"GET_Module_Results",selected="Multi-omics_Heatmaps")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Get multi-omics comprehensive heatmap',
@@ -14390,13 +14449,13 @@ shinyServer(function(input, output, session) {
       #getMoHeatmaps后给予用户的反馈提示
       output$heatmap_finish<-renderUI({
         
-        list(br(),column(12,h3(strong("The process of getting multi-omics comprehensive heatmap has been finished, you can download and check the figure as well as the '.RData' file. Now all steps in 'GET Module' have been finished, let's start the second step of MOVICS--COMP Module!")),style="color:darkblack"),br(),
+        list(br(),column(12,h3(strong("The process of getting multi-omics comprehensive heatmap has been finished, you can download and check the figure as well as the '.RData' file. Now all steps in 'GET Module' have been finished, let's start the second step of MOVICShiny--COMP Module!")),style="color:darkblack"),br(),
              column(12,downloadButton("getMoHeatmaps_download",strong("Download RData file of the results"),style="background-color:#47AEE9"))) ###下载按钮
       })
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #98.Estimating x-year survival填写表格
     output$table.xyrs_est_compSurv<-renderRHandsontable({
@@ -14482,8 +14541,9 @@ shinyServer(function(input, output, session) {
     })
     
     #100.compSurv_process事件响应按钮
-    observeEvent(input$compSurv_process,{
+    observeEvent(input$compSurv_process,shinyCatch({
       
+      updateTabsetPanel(session,"COMP_Module_Results",selected="Survival")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$tcga_vali_compSurv==1,'Compare the prognosis of different subtypes on tcga datasets','Compare the prognosis of different subtypes on validation datasets'),
@@ -14678,7 +14738,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
   
     #101.Specify variables in survival and clinical information for summary and statistical tests填写表格
     output$table.variables_compClinvar<-renderRHandsontable({
@@ -14761,8 +14821,9 @@ shinyServer(function(input, output, session) {
     })
     
     #105.compClinvar_process事件响应按钮
-    observeEvent(input$compClinvar_process,{
+    observeEvent(input$compClinvar_process,shinyCatch({
       
+      updateTabsetPanel(session,"COMP_Module_Results",selected="Clinical_Features")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$tcga_vali_compClinvar==1,'Compare the specified clinical variables of different subtypes on tcga datasets','Compare the specified clinical variables of different subtypes on validation datasets'),
@@ -15120,7 +15181,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #106.Colors for each subtype填写表格
     output$table.compMut_clustcolor<-renderRHandsontable({
@@ -15207,8 +15268,9 @@ shinyServer(function(input, output, session) {
     })
     
     #108.compMut_process事件响应按钮
-    observeEvent(input$compMut_process,{
+    observeEvent(input$compMut_process,shinyCatch({
       
+      updateTabsetPanel(session,"COMP_Module_Results",selected="Mutational_Frequency")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$tcga_vali_compMut==1,'Compare mutational frequency among different subtypes on tcga datasets','Compare mutational frequency among different subtypes on validation datasets'),
@@ -15628,7 +15690,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #109.Input variant classification填写表格
     output$table.nonSyn_compTMB<-renderRHandsontable({
@@ -15714,8 +15776,9 @@ shinyServer(function(input, output, session) {
     })
     
     #111.compTMB_process事件响应按钮
-    observeEvent(input$compTMB_process,{
+    observeEvent(input$compTMB_process,shinyCatch({
       
+      updateTabsetPanel(session,"COMP_Module_Results",selected="TMB")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$tcga_vali_compTMB==1,'Compare total mutation burden among different subtypes (TCGA)','Compare total mutation burden among different subtypes (Validation)'),
@@ -16845,7 +16908,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #112.The mapping color for bars of FGA, FGG and FGL填写表格
     output$table.barcolor_compFGA<-renderRHandsontable({
@@ -16931,8 +16994,9 @@ shinyServer(function(input, output, session) {
     })
     
     #114.compFGA_process事件响应按钮
-    observeEvent(input$compFGA_process,{
+    observeEvent(input$compFGA_process,shinyCatch({
       
+      updateTabsetPanel(session,"COMP_Module_Results",selected="FGA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Calculate and compare FGA, FGG as well as FGL among different subtypes',
@@ -17177,7 +17241,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #115.Colors for each subtype填写表格
     output$table.compDrugsen_clustcolor<-renderRHandsontable({
@@ -17243,8 +17307,9 @@ shinyServer(function(input, output, session) {
     })
     
     #116.compDrugsen_process事件响应按钮
-    observeEvent(input$compDrugsen_process,{
+    observeEvent(input$compDrugsen_process,shinyCatch({
       
+      updateTabsetPanel(session,"COMP_Module_Results",selected="Drug_Sensitivity")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Estimate and compare the IC50 of specific drug among different subtypes',
@@ -17581,7 +17646,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #117.Variable name of traditional subtypes for comparison填写表格
     output$table.subt2comp_compAgree<-renderRHandsontable({
@@ -17667,8 +17732,9 @@ shinyServer(function(input, output, session) {
     })
     
     #119.compAgree_process事件响应按钮
-    observeEvent(input$compAgree_process,{
+    observeEvent(input$compAgree_process,shinyCatch({
       
+      updateTabsetPanel(session,"COMP_Module_Results",selected="Agreement")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Compute four evaluation indicators (RI, AMI, JI, FM) for agreement of two partitions',
@@ -17966,21 +18032,22 @@ shinyServer(function(input, output, session) {
       output$compAgree_finish<-renderUI({
         
         if(input$tcga_vali_compAgree==1){
-          list(br(),column(12,h3(strong("The process of comparing agreement with other subtypes on tcga datasets has been finished, you can download and check the table and figure, as well as the '.RData' file. Now all steps in 'COMP Module' have been finished, let's start the final step of MOVICS--RUN Module!")),style="color:darkblack"),br(),
+          list(br(),column(12,h3(strong("The process of comparing agreement with other subtypes on tcga datasets has been finished, you can download and check the table and figure, as well as the '.RData' file. Now all steps in 'COMP Module' have been finished, let's start the final step of MOVICShiny--RUN Module!")),style="color:darkblack"),br(),
                column(12,downloadButton("compAgrees_download",strong("Download RData file of the results"),style="background-color:#47AEE9"))) ###下载按钮
         }else{
-          list(br(),column(12,h3(strong("The process of comparing agreement with other subtypes on validation datasets has been finished, you can download and check the table and figure, as well as the '.RData' file. Now all steps in 'COMP Module' have been finished, let's start the final step of MOVICS--RUN Module!")),style="color:darkblack"),br(),
+          list(br(),column(12,h3(strong("The process of comparing agreement with other subtypes on validation datasets has been finished, you can download and check the table and figure, as well as the '.RData' file. Now all steps in 'COMP Module' have been finished, let's start the final step of MOVICShiny--RUN Module!")),style="color:darkblack"),br(),
                column(12,downloadButton("compAgrees_download",strong("Download RData file of the results"),style="background-color:#47AEE9"))) ###下载按钮
         }
       })
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #120.runDEA_process事件响应按钮
-    observeEvent(input$runDEA_process,{
+    observeEvent(input$runDEA_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="DEA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$dea_method_runDEA==1,"Perform differential expression analysis using 'deseq2' algorithm between two classes",ifelse(input$dea_method_runDEA==2,"Perform differential expression analysis using 'edger' algorithm between two classes","Perform differential expression analysis using 'limma' algorithm between two classes")),
@@ -18200,7 +18267,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #121.Sample annotations from survival information for heatmap填写表格
     output$table.runMarker_annCol<-renderRHandsontable({
@@ -18296,8 +18363,9 @@ shinyServer(function(input, output, session) {
     })
     
     #124.runMarker_process事件响应按钮
-    observeEvent(input$runMarker_process,{
+    observeEvent(input$runMarker_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="Biomarkers_Identification")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$dirct_runMarker==1,"Identify uniquely and significantly overexpressed biomarkers for each subtype","Identify uniquely and significantly downexpressed biomarkers for each subtype"),
@@ -18762,11 +18830,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #125.基因集富集分析参考文件链接下载处理按钮
-    observeEvent(input$gsea_geneset_background_preparation_process2,{
+    observeEvent(input$gsea_geneset_background_preparation_process2,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="GSEA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download gene set background file using specified url',
@@ -18804,11 +18873,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #126.基因集富集分析参考文件上传处理按钮
-    observeEvent(input$gsea_geneset_background_preparation_process3,{
+    observeEvent(input$gsea_geneset_background_preparation_process3,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="GSEA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload gene set background file',
@@ -18843,7 +18913,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #127.Colors for annotating each cluster at the top of heatmap填写表格
     output$table.runGSEA_clustcolor<-renderRHandsontable({
@@ -18917,8 +18987,9 @@ shinyServer(function(input, output, session) {
     })
     
     #129.runGSEA_process事件响应按钮
-    observeEvent(input$runGSEA_process,{
+    observeEvent(input$runGSEA_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="GSEA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$dirct_runGSEA==1,"Perform gene set enrichment analysis to identify subtype-specific overexpressed functional pathways for each subtype","Perform gene set enrichment analysis to identify subtype-specific downexpressed functional pathways for each subtype"),
@@ -19362,11 +19433,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-   })
+   }, blocking_level = "error",trace_back = TRUE))
    
     #130.基因集变异分析的感兴趣基因集列表链接下载处理按钮
-    observeEvent(input$gsva_geneset_interest_preparation_process2,{
+    observeEvent(input$gsva_geneset_interest_preparation_process2,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="GSVA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Download the gene set list of interest using specified url',
@@ -19404,11 +19476,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #131.基因集变异分析的感兴趣基因集列表上传处理按钮
-    observeEvent(input$gsva_geneset_interest_preparation_process3,{
+    observeEvent(input$gsva_geneset_interest_preparation_process3,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="GSVA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = 'Upload the gene set list of interest',
@@ -19443,7 +19516,7 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #132.Sample annotations from survival information for heatmap填写表格
     output$table.runGSVA_annCol<-renderRHandsontable({
@@ -19539,8 +19612,9 @@ shinyServer(function(input, output, session) {
     })
     
     #135.runGSVA_process事件响应按钮
-    observeEvent(input$runGSVA_process,{
+    observeEvent(input$runGSVA_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="GSVA")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = "Perform gene set variation analysis to calculate enrichment score of each sample in each subtype",
@@ -20018,11 +20092,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #136.runNTP_process事件响应按钮
-    observeEvent(input$runNTP_process,{
+    observeEvent(input$runNTP_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="NTP")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$tcga_vali_runNTP==1,"Assign potential subtype labels on tcga cohort using Nearest Template Prediction (NTP)","Assign potential subtype labels on validation cohort using Nearest Template Prediction (NTP)"),
@@ -20330,11 +20405,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #137.runPAM_process事件响应按钮
-    observeEvent(input$runPAM_process,{
+    observeEvent(input$runPAM_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="PAM")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = ifelse(input$tcga_vali_runPAM==1,"Use partition around medoids (PAM) classifier to predict potential subtype labels on tcga cohort and calculate in-group proportions (IGP) statistics","Use partition around medoids (PAM) classifier to predict potential subtype labels on validation cohort and calculate in-group proportions (IGP) statistics"),
@@ -20780,11 +20856,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #138.runKappa1_process事件响应按钮
-    observeEvent(input$runKappa1_process,{
+    observeEvent(input$runKappa1_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="Kappa_Statistics")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = "Run consistency evaluation using Kappa statistics between current subtypes derived from multi-omics clustering and NTP-predicted subtypes on tcga cohort",
@@ -20898,11 +20975,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #139.runKappa2_process事件响应按钮
-    observeEvent(input$runKappa2_process,{
+    observeEvent(input$runKappa2_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="Kappa_Statistics")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = "Run consistency evaluation using Kappa statistics between current subtypes derived from multi-omics clustering and PAM-predicted subtypes on tcga cohort",
@@ -21016,11 +21094,12 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #140.runKappa3_process事件响应按钮
-    observeEvent(input$runKappa3_process,{
+    observeEvent(input$runKappa3_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="Kappa_Statistics")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = "Run consistency evaluation using Kappa statistics between NTP-predicted subtypes and PAM-predicted subtypes on tcga cohort",
@@ -21124,12 +21203,13 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     
     #141.runKappa4_process事件响应按钮
-    observeEvent(input$runKappa4_process,{
+    observeEvent(input$runKappa4_process,shinyCatch({
       
+      updateTabsetPanel(session,"RUN_Module_Results",selected="Kappa_Statistics")
       progress <- Progress$new(session, min=1, max=4) #设置进度条
       on.exit(progress$close())
       progress$set(message = "Run consistency evaluation using Kappa statistics between NTP-predicted subtypes and PAM-predicted subtypes on validation cohort",
@@ -21227,20 +21307,21 @@ shinyServer(function(input, output, session) {
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     #142.MOVICS_finish_process事件响应按钮
-    observeEvent(input$MOVICS_finish_process,{
+    observeEvent(input$MOVICS_finish_process,shinyCatch({
       
-      #完成MOVICS所有步骤后给予用户的反馈提示
+      updateTabsetPanel(session,"RUN_Module_Results",selected="Kappa_Statistics")
+      #完成MOVICShiny所有步骤后给予用户的反馈提示
       output$MOVICS_finish<-renderUI({
         
-        list(br(),column(12,h3(strong("Now all steps in MOVICS have been finished, you can download and check all the tables and figures, as well as the '.RData' files. Then you can further process the obtained results, thanks for using MOVICS RShiny and we are looking forward to your valuable feedback and another visit!")),style="color:darkblack"))
+        list(br(),column(12,h3(strong("Now all steps in MOVICShiny have been finished, you can download and check all the tables and figures, as well as the '.RData' files. Then you can further process the obtained results, thanks for using MOVICShiny and we are looking forward to your valuable feedback and another visit!")),style="color:darkblack"))
       })
       
       #rm(list=ls()) #清空变量
       gc() #释放内存 
-    })
+    }, blocking_level = "error",trace_back = TRUE))
     
     ##143.Users Guide
     output$usersGuide<-renderUI({
