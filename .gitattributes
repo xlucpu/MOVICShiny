@@ -1,3 +1,4 @@
 Test_Data filter=lfs diff=lfs merge=lfs -text
 Test_Data.zip filter=lfs diff=lfs merge=lfs -text
 *.mp4 filter=lfs diff=lfs merge=lfs -text
+tutorial[[:space:]]video.zip filter=lfs diff=lfs merge=lfs -text
